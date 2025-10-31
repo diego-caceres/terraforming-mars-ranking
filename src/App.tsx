@@ -86,7 +86,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Rankings de Juegos de Mesa
+              Rankings de Terraforming Mars
             </h1>
             <DarkModeToggle darkMode={darkMode} onToggle={handleToggleDarkMode} />
           </div>

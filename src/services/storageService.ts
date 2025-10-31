@@ -357,11 +357,11 @@ export function clearAllData(): void {
 }
 
 /**
- * Get all games
+ * Get all games (sorted by date descending - most recent first)
  */
 export function getAllGames(): Game[] {
   const data = loadData();
-  return [...data.games].reverse(); // Most recent first
+  return [...data.games].sort((a, b) => b.date - a.date); // Sort by date, most recent first
 }
 
 /**
