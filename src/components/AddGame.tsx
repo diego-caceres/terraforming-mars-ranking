@@ -46,7 +46,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (placements.length < 2) {
-      alert('Please select at least 2 players');
+      alert('Por favor seleccioná al menos 2 jugadores');
       return;
     }
 
@@ -94,19 +94,19 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-        Record Game Result
+        Registrar Resultado de Partida
       </h2>
 
       {showSuccess && (
         <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md">
           <div className="flex items-center justify-between">
-            <span>Game recorded successfully! Ratings have been updated.</span>
+            <span>¡Partida registrada exitosamente! Los ratings han sido actualizados.</span>
             {canUndo && (
               <button
                 onClick={handleUndo}
                 className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium transition-colors text-sm"
               >
-                Undo Last Game
+                Deshacer Última Partida
               </button>
             )}
           </div>
@@ -117,7 +117,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
         {/* Game Date */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Game Date
+            Fecha de la Partida
           </label>
           <input
             type="date"
@@ -127,14 +127,14 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Select the date this game was played
+            Seleccioná la fecha en que se jugó esta partida
           </p>
         </div>
 
         {/* Expansions */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Expansions Used (Optional)
+            Expansiones Usadas (Opcional)
           </label>
           <div className="flex flex-wrap gap-2">
             {AVAILABLE_EXPANSIONS.map(expansion => (
@@ -157,7 +157,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
         {/* Generations */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Number of Generations (Optional)
+            Número de Generaciones (Opcional)
           </label>
           <input
             type="number"
@@ -165,24 +165,24 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
             max="16"
             value={generations}
             onChange={(e) => setGenerations(e.target.value)}
-            placeholder="Enter number (1-16)"
+            placeholder="Ingresá un número (1-16)"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            How many generations were played in this game?
+            ¿Cuántas generaciones se jugaron en esta partida?
           </p>
         </div>
 
         {/* Player Selection */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Select Players
+            Seleccionar Jugadores
           </label>
           {availablePlayers.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {playerArray.length === 0
-                ? 'No players available. Please add players first.'
-                : 'All players have been selected.'}
+                ? 'No hay jugadores disponibles. Por favor agregá jugadores primero.'
+                : 'Todos los jugadores han sido seleccionados.'}
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -204,10 +204,10 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
         {placements.length > 0 && (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Placement Order (Drag to reorder)
+              Orden de Posiciones (Arrastrá para reordenar)
             </label>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Top = 1st place, Bottom = Last place
+              Arriba = 1er lugar, Abajo = Último lugar
             </p>
 
             <DragDropContext onDragEnd={handleDragEnd}>
@@ -245,7 +245,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
                                   {player?.name}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  Current Rating: {Math.round(player?.currentRating || 0)}
+                                  Rating Actual: {Math.round(player?.currentRating || 0)}
                                 </div>
                               </div>
                               <button

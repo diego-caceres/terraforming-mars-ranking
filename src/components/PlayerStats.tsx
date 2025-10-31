@@ -34,7 +34,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
   }));
 
   const formatDate = (timestamp: number | null) => {
-    if (!timestamp) return 'Never';
+    if (!timestamp) return 'Nunca';
     return new Date(timestamp).toLocaleDateString();
   };
 
@@ -48,7 +48,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
               {stats.player.name}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Member since {formatDate(stats.player.createdAt)}
+              Miembro desde {formatDate(stats.player.createdAt)}
             </p>
           </div>
           <button
@@ -66,25 +66,25 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 {Math.round(stats.player.currentRating)}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Current Rating</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Rating Actual</div>
             </div>
             <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
               <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                 {stats.player.gamesPlayed}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Games Played</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Partidas Jugadas</div>
             </div>
             <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg">
               <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                 {stats.winRate.toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Win Rate</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">% de Victorias</div>
             </div>
             <div className="bg-orange-50 dark:bg-orange-900/30 p-4 rounded-lg">
               <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
                 {stats.averagePlacement.toFixed(1)}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Avg Placement</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Posición Promedio</div>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {chartData.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Rating History
+                Historial de Rating
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <ResponsiveContainer width="100%" height={250}>
@@ -100,7 +100,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis
                       dataKey="game"
-                      label={{ value: 'Game Number', position: 'insideBottom', offset: -5 }}
+                      label={{ value: 'Número de Partida', position: 'insideBottom', offset: -5 }}
                       stroke="#9CA3AF"
                     />
                     <YAxis
@@ -132,29 +132,29 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {headToHeads.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Head-to-Head Records
+                Récords Cara a Cara
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-100 dark:bg-gray-800">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Opponent
+                        Oponente
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Games
+                        Partidas
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Wins
+                        Victorias
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Losses
+                        Derrotas
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Ties
+                        Empates
                       </th>
                       <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                        Win %
+                        % Victorias
                       </th>
                     </tr>
                   </thead>
@@ -168,7 +168,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                       return (
                         <tr key={record.opponentId}>
                           <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {opponent?.name || 'Unknown'}
+                            {opponent?.name || 'Desconocido'}
                           </td>
                           <td className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
                             {record.gamesPlayed}
@@ -198,7 +198,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {stats.recentGames.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Recent Games
+                Partidas Recientes
               </h3>
               <div className="space-y-2">
                 {stats.recentGames.map(game => {
@@ -213,7 +213,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            Placed #{placement + 1} of {game.placements.length}
+                            Posición #{placement + 1} de {game.placements.length}
                           </span>
                         </div>
                         <div className="text-right">
@@ -234,7 +234,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                         </div>
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Players: {game.placements.map(id => allPlayers[id]?.name || 'Unknown').join(', ')}
+                        Jugadores: {game.placements.map(id => allPlayers[id]?.name || 'Desconocido').join(', ')}
                       </div>
                     </div>
                   );

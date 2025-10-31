@@ -19,11 +19,11 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return 'Today';
+      return 'Hoy';
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return 'Ayer';
     } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
+      return `Hace ${diffDays} días`;
     } else {
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -50,7 +50,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Total Games
+              Total de Partidas
             </p>
             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
               {totalGames}
@@ -79,12 +79,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
         <div className="flex items-center justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Last Game
+              Última Partida
             </p>
             {lastGame ? (
               <div className="mt-2">
                 <p className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
-                  {lastGameWinner?.name || 'Unknown'}
+                  {lastGameWinner?.name || 'Desconocido'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {lastGameDate && formatDate(lastGameDate)}
@@ -92,7 +92,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
               </div>
             ) : (
               <p className="text-lg font-medium text-gray-400 dark:text-gray-500 mt-2">
-                No games yet
+                Aún no hay partidas
               </p>
             )}
           </div>
@@ -119,7 +119,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
         <div className="flex items-center justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Top Rated
+              Mejor Rating
             </p>
             {topPlayer ? (
               <div className="mt-2">
@@ -127,12 +127,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                   {topPlayer.name}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {Math.round(topPlayer.currentRating)} rating
+                  {Math.round(topPlayer.currentRating)} puntos
                 </p>
               </div>
             ) : (
               <p className="text-lg font-medium text-gray-400 dark:text-gray-500 mt-2">
-                No players
+                Sin jugadores
               </p>
             )}
           </div>
@@ -159,7 +159,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
         <div className="flex items-center justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Most Active
+              Más Activo
             </p>
             {mostActivePlayer ? (
               <div className="mt-2">
@@ -167,12 +167,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                   {mostActivePlayer.name}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {mostActivePlayer.gamesPlayed} games
+                  {mostActivePlayer.gamesPlayed} {mostActivePlayer.gamesPlayed === 1 ? 'partida' : 'partidas'}
                 </p>
               </div>
             ) : (
               <p className="text-lg font-medium text-gray-400 dark:text-gray-500 mt-2">
-                No players
+                Sin jugadores
               </p>
             )}
           </div>

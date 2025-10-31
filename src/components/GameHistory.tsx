@@ -19,7 +19,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
   };
 
   const getPlayerName = (playerId: string) => {
-    return players[playerId]?.name || 'Unknown Player';
+    return players[playerId]?.name || 'Jugador Desconocido';
   };
 
   const handleGameClick = (game: Game) => {
@@ -33,14 +33,14 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
     if (!game) return;
 
     const playerNames = game.placements
-      .map(id => players[id]?.name || 'Unknown')
+      .map(id => players[id]?.name || 'Desconocido')
       .join(', ');
 
     const confirmed = window.confirm(
-      `Are you sure you want to delete this game?\n\n` +
-      `Date: ${formatDate(game.date)}\n` +
-      `Players: ${playerNames}\n\n` +
-      `This will recalculate all ratings from scratch. This action cannot be undone.`
+      `¿Estás seguro de que querés eliminar esta partida?\n\n` +
+      `Fecha: ${formatDate(game.date)}\n` +
+      `Jugadores: ${playerNames}\n\n` +
+      `Esto recalculará todos los ratings desde cero. Esta acción no se puede deshacer.`
     );
 
     if (confirmed) {
@@ -55,16 +55,16 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Game History
+          Historial de Partidas
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {games.length} game{games.length !== 1 ? 's' : ''} recorded
+          {games.length} {games.length === 1 ? 'partida registrada' : 'partidas registradas'}
         </p>
       </div>
 
       {games.length === 0 ? (
         <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-          No games recorded yet. Record your first game to see it here!
+          Aún no hay partidas registradas. ¡Registrá tu primera partida para verla acá!
         </div>
       ) : (
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -85,7 +85,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                           {formatDate(game.date)}
                         </span>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {game.placements.length} players
+                          {game.placements.length} {game.placements.length === 1 ? 'jugador' : 'jugadores'}
                         </span>
                         {game.generations && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -94,7 +94,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                         )}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Winner: <span className="font-semibold text-gray-900 dark:text-gray-100">{winner?.name}</span>
+                        Ganador: <span className="font-semibold text-gray-900 dark:text-gray-100">{winner?.name}</span>
                       </div>
                       {game.expansions && game.expansions.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
@@ -113,7 +113,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                       <button
                         onClick={(e) => handleDeleteGame(game.id, e)}
                         className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                        title="Delete game"
+                        title="Eliminar partida"
                       >
                         <svg
                           className="w-5 h-5"
@@ -146,7 +146,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                 {isExpanded && (
                   <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                      Final Standings
+                      Clasificación Final
                     </h3>
                     <div className="space-y-2">
                       {game.placements.map((playerId, index) => {
@@ -174,10 +174,10 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                               </div>
                               <div>
                                 <div className="font-medium text-gray-900 dark:text-gray-100">
-                                  {player?.name || 'Unknown'}
+                                  {player?.name || 'Desconocido'}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  Rating after game: {Math.round((player?.currentRating || 0))}
+                                  Rating después de la partida: {Math.round((player?.currentRating || 0))}
                                 </div>
                               </div>
                             </div>
@@ -202,20 +202,20 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-gray-500 dark:text-gray-400">Game ID:</span>
+                          <span className="text-gray-500 dark:text-gray-400">ID de Partida:</span>
                           <span className="ml-2 text-gray-900 dark:text-gray-100 font-mono text-xs">
                             {game.id}
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-500 dark:text-gray-400">Players:</span>
+                          <span className="text-gray-500 dark:text-gray-400">Jugadores:</span>
                           <span className="ml-2 text-gray-900 dark:text-gray-100">
                             {game.placements.map(id => getPlayerName(id)).join(', ')}
                           </span>
                         </div>
                         {game.generations && (
                           <div>
-                            <span className="text-gray-500 dark:text-gray-400">Generations:</span>
+                            <span className="text-gray-500 dark:text-gray-400">Generaciones:</span>
                             <span className="ml-2 text-gray-900 dark:text-gray-100">
                               {game.generations}
                             </span>
@@ -223,7 +223,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                         )}
                         {game.expansions && game.expansions.length > 0 && (
                           <div>
-                            <span className="text-gray-500 dark:text-gray-400">Expansions:</span>
+                            <span className="text-gray-500 dark:text-gray-400">Expansiones:</span>
                             <span className="ml-2 text-gray-900 dark:text-gray-100">
                               {game.expansions.join(', ')}
                             </span>

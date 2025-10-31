@@ -45,7 +45,7 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Rankings {activeOnly && <span className="text-sm font-normal text-gray-500">(Active Players)</span>}
+          Clasificación {activeOnly && <span className="text-sm font-normal text-gray-500">(Jugadores Activos)</span>}
         </h2>
         <div className="mt-2 flex gap-2">
           <button
@@ -56,7 +56,7 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            By Rating
+            Por Rating
           </button>
           <button
             onClick={() => setSortBy('games')}
@@ -66,7 +66,7 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            By Games
+            Por Partidas
           </button>
           <button
             onClick={() => setSortBy('winRate')}
@@ -76,14 +76,14 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            By Win Rate
+            Por % Victorias
           </button>
         </div>
       </div>
 
       {sortedPlayers.length === 0 ? (
         <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-          No players yet. Add your first player to get started!
+          Aún no hay jugadores. ¡Agregá tu primer jugador para comenzar!
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -91,22 +91,22 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Rank
+                  Posición
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Player
+                  Jugador
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Rating
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Games
+                  Partidas
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Win Rate
+                  % Victorias
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Last Change
+                  Último Cambio
                 </th>
               </tr>
             </thead>
@@ -132,7 +132,7 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
                         </span>
                         {lowConfidence && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                            New
+                            Nuevo
                           </span>
                         )}
                       </div>

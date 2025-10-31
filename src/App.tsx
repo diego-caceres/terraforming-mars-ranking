@@ -86,7 +86,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Board Game Rankings
+              Rankings de Juegos de Mesa
             </h1>
             <DarkModeToggle darkMode={darkMode} onToggle={handleToggleDarkMode} />
           </div>
@@ -115,7 +115,7 @@ function App() {
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Add Game
+              Registrar partida
             </button>
             <button
               onClick={() => setActiveTab('players')}
@@ -125,7 +125,7 @@ function App() {
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Players
+              Jugadores
             </button>
             <button
               onClick={() => setActiveTab('history')}
@@ -135,7 +135,7 @@ function App() {
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              History
+              Historial
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -145,7 +145,7 @@ function App() {
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Settings
+              Configuración
             </button>
           </div>
         </div>
@@ -165,7 +165,7 @@ function App() {
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}
               >
-                {activeOnly ? 'Showing Active Players' : 'Show Active Only'}
+                {activeOnly ? 'Mostrando Jugadores Activos' : 'Mostrar Solo Activos'}
               </button>
             </div>
             <Rankings
@@ -198,26 +198,39 @@ function App() {
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                About the Elo System
+                Acerca del Sistema Elo
               </h3>
-              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <p>
-                  <strong>K-Factor:</strong> 40 (determines how much ratings change per game)
-                </p>
-                <p>
-                  <strong>Starting Rating:</strong> 1500 for all new players
-                </p>
-                <p>
-                  <strong>Calculation:</strong> Each player is compared against every other player in the game
-                </p>
-                <p>
-                  <strong>Confidence:</strong> Players with fewer than 10 games are marked as "New"
-                </p>
-                <p className="mt-4">
-                  This multiplayer Elo system calculates rating changes by comparing each player's
-                  placement against all other players in the game. Players who place higher gain more
-                  points, especially when beating higher-rated opponents.
-                </p>
+              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Características principales:</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li><strong>K-Factor: 40</strong> - Determina qué tan rápido cambian los ratings después de cada partida</li>
+                    <li><strong>Rating Inicial: 1500</strong> - Todos los jugadores nuevos empiezan con este puntaje</li>
+                    <li><strong>Umbral de Confianza: 10 partidas</strong> - Los jugadores con menos de 10 partidas se marcan como "Nuevo"</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Cómo funciona:</h4>
+                  <p className="mb-2">
+                    En este sistema multijugador, cada jugador es comparado contra <strong>todos los demás jugadores</strong> en la partida.
+                    Para cada par de jugadores:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 ml-2">
+                    <li>Se calcula la <strong>probabilidad esperada</strong> de ganar basada en la diferencia de ratings</li>
+                    <li>Se determina el <strong>resultado real</strong>: 1.0 = victoria, 0.5 = empate, 0.0 = derrota</li>
+                    <li>El cambio de rating se calcula como: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">Cambio = K × (Resultado Real - Resultado Esperado)</code></li>
+                    <li>Se suman todos los cambios de cada comparación para obtener el cambio total del jugador</li>
+                  </ol>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border-l-4 border-blue-500">
+                  <p className="text-blue-900 dark:text-blue-200">
+                    <strong>Ejemplo:</strong> Si terminás 1° en una partida de 4 jugadores, tu rating aumenta más si venciste
+                    a jugadores con rating alto que si venciste a jugadores con rating bajo. El sistema recompensa ganarle a
+                    oponentes fuertes y penaliza perder contra oponentes débiles.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

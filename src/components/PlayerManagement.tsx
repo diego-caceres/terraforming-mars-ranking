@@ -16,7 +16,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
     const trimmedName = newPlayerName.trim();
 
     if (!trimmedName) {
-      alert('Please enter a player name');
+      alert('Por favor ingresá un nombre de jugador');
       return;
     }
 
@@ -26,7 +26,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
     );
 
     if (existingPlayer) {
-      alert('A player with this name already exists');
+      alert('Ya existe un jugador con este nombre');
       return;
     }
 
@@ -43,26 +43,26 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-        Player Management
+        Gestión de Jugadores
       </h2>
 
       {showSuccess && (
         <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md">
-          Player added successfully!
+          ¡Jugador agregado exitosamente!
         </div>
       )}
 
       {/* Add Player Form */}
       <form onSubmit={handleSubmit} className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Add New Player
+          Agregar Nuevo Jugador
         </label>
         <div className="flex gap-2">
           <input
             type="text"
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Enter player name"
+            placeholder="Ingresá el nombre del jugador"
             className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             maxLength={50}
           />
@@ -70,23 +70,23 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
             type="submit"
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
           >
-            Add Player
+            Agregar Jugador
           </button>
         </div>
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          New players start with a rating of 1500
+          Los jugadores nuevos empiezan con un rating de 1500
         </p>
       </form>
 
       {/* Player List */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-          All Players ({playerArray.length})
+          Todos los Jugadores ({playerArray.length})
         </h3>
 
         {playerArray.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">
-            No players yet. Add your first player above!
+            Aún no hay jugadores. ¡Agregá tu primer jugador arriba!
           </p>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -101,7 +101,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
                     {player.name}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {player.gamesPlayed} games played
+                    {player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida jugada' : 'partidas jugadas'}
                   </div>
                 </div>
                 <div className="text-right">
