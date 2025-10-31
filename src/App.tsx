@@ -6,6 +6,7 @@ import PlayerStats from './components/PlayerStats';
 import GameHistory from './components/GameHistory';
 import DarkModeToggle from './components/common/DarkModeToggle';
 import ExportImport from './components/common/ExportImport';
+import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
 import { useDarkMode } from './hooks/useDarkMode';
 import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/storageService';
@@ -21,6 +22,8 @@ function App() {
   const [games, setGames] = useState<Game[]>([]);
   const [activeOnly, setActiveOnly] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const loadData = () => {
     const allPlayers = getAllPlayers();
@@ -36,16 +39,28 @@ function App() {
   }, [activeOnly]);
 
   const handleAddPlayer = (name: string) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     addPlayer(name);
     loadData();
   };
 
   const handleRecordGame = (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
     loadData();
   };
 
   const handleUndoLastGame = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     const success = deleteLastGame();
     if (success) {
       loadData();
@@ -53,6 +68,10 @@ function App() {
   };
 
   const handleDeleteGame = (gameId: string) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     const success = deleteGameById(gameId);
     if (success) {
       loadData();
@@ -88,7 +107,24 @@ function App() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Rankings de Terraforming Mars
             </h1>
-            <DarkModeToggle darkMode={darkMode} onToggle={handleToggleDarkMode} />
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => setIsAuthenticated(false)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                >
+                  Cerrar sesión
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  Iniciar sesión
+                </button>
+              )}
+              <DarkModeToggle darkMode={darkMode} onToggle={handleToggleDarkMode} />
+            </div>
           </div>
         </div>
       </header>
@@ -194,7 +230,11 @@ function App() {
 
         {activeTab === 'settings' && (
           <div className="space-y-6">
-            <ExportImport onImportSuccess={handleImportSuccess} />
+            <ExportImport 
+              onImportSuccess={handleImportSuccess}
+              isAuthenticated={isAuthenticated}
+              onAuthenticationRequired={() => setShowLoginModal(true)}
+            />
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -241,6 +281,16 @@ function App() {
       {selectedPlayerId && (
         <PlayerStats playerId={selectedPlayerId} onClose={handleClosePlayerStats} />
       )}
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onLogin={() => {
+          setIsAuthenticated(true);
+          setShowLoginModal(false);
+        }}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }

@@ -3,14 +3,20 @@ import { exportData, importData } from '../../services/storageService';
 
 interface ExportImportProps {
   onImportSuccess: () => void;
+  isAuthenticated: boolean;
+  onAuthenticationRequired: () => void;
 }
 
-export default function ExportImport({ onImportSuccess }: ExportImportProps) {
+export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthenticationRequired }: ExportImportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleExport = () => {
+    if (!isAuthenticated) {
+      onAuthenticationRequired();
+      return;
+    }
     try {
       const data = exportData();
       const blob = new Blob([data], { type: 'application/json' });
@@ -33,6 +39,10 @@ export default function ExportImport({ onImportSuccess }: ExportImportProps) {
   };
 
   const handleImport = () => {
+    if (!isAuthenticated) {
+      onAuthenticationRequired();
+      return;
+    }
     fileInputRef.current?.click();
   };
 
