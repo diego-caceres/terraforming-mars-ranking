@@ -1,0 +1,69 @@
+### Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+### Build
+dist/
+build/
+.vite/
+out/
+coverage/
+
+### Environment
+.env
+.env.*.local
+.env.local
+
+### TypeScript
+*.tsbuildinfo
+
+### Logs
+logs/
+*.log
+
+### OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### Editors/IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+### Lockfiles (optional to ignore)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Misc
+.env.backup
+/.cache
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
