@@ -43,8 +43,15 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
     return player.currentRating > (max?.currentRating || 0) ? player : max;
   }, null as Player | null);
 
+  const antoPlayer = Object.values(players).find(
+    (player) => player.name.trim().toLowerCase() === 'anto'
+  );
+  const antoGames = antoPlayer ? games.filter((game) => game.placements.includes(antoPlayer.id)) : [];
+  const antoGamesCount = antoGames.length;
+  const antoLastGameDate = antoGamesCount > 0 ? new Date(antoGames[0].date) : null;
+
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
       {/* Total Games */}
       <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
         <div className="flex items-center justify-between gap-4">
@@ -188,6 +195,53 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Espectadora Premium */}
+      <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+              Espectadora Premium
+            </p>
+            {antoPlayer ? (
+              <div className="mt-3 space-y-1">
+                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
+                  {antoPlayer.name}
+                </p>
+                <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                  {antoGamesCount > 0 && antoLastGameDate
+                    ? `Última partida: ${formatDate(antoLastGameDate)}`
+                    : 'Animando desde las gradas'}
+                </p>
+                {antoGamesCount > 0 && (
+                  <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                    Partidas registradas: {antoGamesCount}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="mt-3 text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
+                Anto aún no aparece en el ranking
+              </p>
+            )}
+          </div>
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/15 text-tm-copper">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5.121 17.804A6.002 6.002 0 0112 14c1.657 0 3.156.672 4.243 1.757M15 11a3 3 0 10-6 0 3 3 0 006 0zM19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2M19 8h-2m-1-3v2a2 2 0 002 2h2"
               />
             </svg>
           </div>
