@@ -6,6 +6,7 @@ import PlayerStats from './components/PlayerStats';
 import GameHistory from './components/GameHistory';
 import DarkModeToggle from './components/common/DarkModeToggle';
 import ExportImport from './components/common/ExportImport';
+import StatsOverview from './components/common/StatsOverview';
 import { useDarkMode } from './hooks/useDarkMode';
 import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/storageService';
 import type { Player, Game } from './types';
@@ -154,6 +155,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'rankings' && (
           <div className="space-y-4">
+            <StatsOverview games={games} players={players} />
             <div className="flex justify-end">
               <button
                 onClick={handleToggleActiveFilter}
