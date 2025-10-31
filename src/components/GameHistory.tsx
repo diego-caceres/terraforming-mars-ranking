@@ -52,22 +52,22 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+    <div className="tm-card overflow-hidden">
+      <div className="tm-card-header px-6 py-5">
+        <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
           Historial de Partidas
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="mt-2 text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
           {games.length} {games.length === 1 ? 'partida registrada' : 'partidas registradas'}
         </p>
       </div>
 
       {games.length === 0 ? (
-        <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+        <div className="px-6 py-12 text-center text-tm-oxide/70 dark:text-tm-sand/70">
           Aún no hay partidas registradas. ¡Registrá tu primera partida para verla acá!
         </div>
       ) : (
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="divide-y divide-tm-copper/20 dark:divide-white/10">
           {games.map((game) => {
             const isExpanded = selectedGame?.id === game.id;
             const winner = players[game.placements[0]];
@@ -76,32 +76,35 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
               <div key={game.id}>
                 <div
                   onClick={() => handleGameClick(game)}
-                  className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  className="px-6 py-5 transition-colors hover:bg-tm-copper/10 dark:hover:bg-white/5 cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <span className="text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                           {formatDate(game.date)}
                         </span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        <span className="tm-chip">
                           {game.placements.length} {game.placements.length === 1 ? 'jugador' : 'jugadores'}
                         </span>
                         {game.generations && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          <span className="tm-chip">
                             {game.generations} gen
                           </span>
                         )}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Ganador: <span className="font-semibold text-gray-900 dark:text-gray-100">{winner?.name}</span>
+                      <div className="text-sm text-tm-oxide/80 dark:text-tm-sand/80">
+                        Ganador:{' '}
+                        <span className="font-semibold text-tm-oxide dark:text-tm-glow">
+                          {winner?.name}
+                        </span>
                       </div>
                       {game.expansions && game.expansions.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
+                        <div className="mt-3 flex flex-wrap gap-2">
                           {game.expansions.map(expansion => (
                             <span
                               key={expansion}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                              className="tm-chip"
                             >
                               {expansion}
                             </span>
@@ -112,7 +115,7 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                     <div className="flex items-center gap-2">
                       <button
                         onClick={(e) => handleDeleteGame(game.id, e)}
-                        className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        className="rounded-full border border-transparent p-2 text-tm-copper hover:border-tm-copper/40 hover:bg-tm-copper/10 dark:text-tm-glow dark:hover:bg-white/10"
                         title="Eliminar partida"
                       >
                         <svg
@@ -129,9 +132,9 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                           />
                         </svg>
                       </button>
-                      <div className="text-gray-400 dark:text-gray-500">
+                      <div className="text-tm-oxide/40 dark:text-tm-sand/40">
                         <svg
-                          className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -144,11 +147,11 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                 </div>
 
                 {isExpanded && (
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="bg-white/70 px-6 py-5 dark:bg-tm-haze/70">
+                    <h3 className="mb-3 text-sm font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
                       Clasificación Final
                     </h3>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {game.placements.map((playerId, index) => {
                         const player = players[playerId];
                         const ratingChange = game.ratingChanges[playerId] || 0;
@@ -156,27 +159,27 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                         return (
                           <div
                             key={playerId}
-                            className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-md"
+                            className="flex items-center justify-between rounded-lg border border-tm-copper/25 bg-white/90 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-tm-haze/80"
                           >
                             <div className="flex items-center gap-3">
                               <div
-                                className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${
+                                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white shadow ${
                                   index === 0
-                                    ? 'bg-yellow-500 text-white'
+                                    ? 'bg-gradient-to-br from-tm-copper to-tm-copper-dark'
                                     : index === 1
-                                    ? 'bg-gray-400 text-white'
+                                    ? 'bg-gradient-to-br from-tm-sand-deep to-tm-oxide'
                                     : index === 2
-                                    ? 'bg-orange-600 text-white'
-                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                    ? 'bg-gradient-to-br from-tm-teal to-tm-teal/70'
+                                    : 'bg-tm-oxide/20 text-tm-oxide'
                                 }`}
                               >
                                 {index + 1}
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900 dark:text-gray-100">
+                                <div className="font-semibold text-tm-oxide dark:text-tm-sand">
                                   {player?.name || 'Desconocido'}
                                 </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                                   Rating después de la partida: {Math.round((player?.currentRating || 0))}
                                 </div>
                               </div>
@@ -184,10 +187,10 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                             <div
                               className={`text-sm font-bold ${
                                 ratingChange > 0
-                                  ? 'text-green-600 dark:text-green-400'
+                                  ? 'text-tm-teal'
                                   : ratingChange < 0
-                                  ? 'text-red-600 dark:text-red-400'
-                                  : 'text-gray-500 dark:text-gray-400'
+                                  ? 'text-tm-copper-dark'
+                                  : 'text-tm-oxide/60 dark:text-tm-sand/60'
                               }`}
                             >
                               {ratingChange > 0 ? '+' : ''}
@@ -199,32 +202,40 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                     </div>
 
                     {/* Game Details */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="mt-5 border-t border-tm-copper/20 pt-4 dark:border-white/10">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-gray-500 dark:text-gray-400">ID de Partida:</span>
-                          <span className="ml-2 text-gray-900 dark:text-gray-100 font-mono text-xs">
+                          <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                            ID de Partida:
+                          </span>
+                          <span className="ml-2 font-mono text-xs text-tm-oxide dark:text-tm-sand">
                             {game.id}
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-500 dark:text-gray-400">Jugadores:</span>
-                          <span className="ml-2 text-gray-900 dark:text-gray-100">
+                          <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                            Jugadores:
+                          </span>
+                          <span className="ml-2 text-tm-oxide dark:text-tm-sand">
                             {game.placements.map(id => getPlayerName(id)).join(', ')}
                           </span>
                         </div>
                         {game.generations && (
                           <div>
-                            <span className="text-gray-500 dark:text-gray-400">Generaciones:</span>
-                            <span className="ml-2 text-gray-900 dark:text-gray-100">
+                            <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                              Generaciones:
+                            </span>
+                            <span className="ml-2 text-tm-oxide dark:text-tm-sand">
                               {game.generations}
                             </span>
                           </div>
                         )}
                         {game.expansions && game.expansions.length > 0 && (
                           <div>
-                            <span className="text-gray-500 dark:text-gray-400">Expansiones:</span>
-                            <span className="ml-2 text-gray-900 dark:text-gray-100">
+                            <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                              Expansiones:
+                            </span>
+                            <span className="ml-2 text-tm-oxide dark:text-tm-sand">
                               {game.expansions.join(', ')}
                             </span>
                           </div>

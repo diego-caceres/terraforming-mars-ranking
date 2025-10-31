@@ -42,38 +42,46 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Clasificación {activeOnly && <span className="text-sm font-normal text-gray-500">(Jugadores Activos)</span>}
-        </h2>
-        <div className="mt-2 flex gap-2">
+    <div className="tm-card overflow-hidden">
+      <div className="tm-card-header px-6 py-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="tm-card-subtitle">Clasificación Elo</p>
+            <h2 className="text-2xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
+              Rankings
+            </h2>
+          </div>
+          {activeOnly && (
+            <span className="tm-chip self-start sm:self-center">Jugadores Activos</span>
+          )}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
           <button
             onClick={() => setSortBy('rating')}
-            className={`px-3 py-1 rounded text-sm font-medium ${
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${
               sortBy === 'rating'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
             Por Rating
           </button>
           <button
             onClick={() => setSortBy('games')}
-            className={`px-3 py-1 rounded text-sm font-medium ${
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${
               sortBy === 'games'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
             Por Partidas
           </button>
           <button
             onClick={() => setSortBy('winRate')}
-            className={`px-3 py-1 rounded text-sm font-medium ${
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${
               sortBy === 'winRate'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
             Por % Victorias
@@ -82,35 +90,35 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
       </div>
 
       {sortedPlayers.length === 0 ? (
-        <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+        <div className="px-6 py-12 text-center text-tm-oxide/70 dark:text-tm-sand/70">
           Aún no hay jugadores. ¡Agregá tu primer jugador para comenzar!
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto bg-white/60 dark:bg-transparent">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-900">
+            <thead className="bg-tm-copper/10 dark:bg-white/5">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   Posición
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   Jugador
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   Rating
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   Partidas
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   % Victorias
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   Último Cambio
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-tm-copper/20 dark:divide-white/10 bg-white/70 dark:bg-transparent">
               {sortedPlayers.map((player, index) => {
                 const ratingChange = getRatingChange(player);
                 const winRate = getWinRate(player);
@@ -120,30 +128,30 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
                   <tr
                     key={player.id}
                     onClick={() => onPlayerClick(player.id)}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                    className="cursor-pointer transition-colors hover:bg-tm-copper/10 dark:hover:bg-white/5"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-tm-oxide dark:text-tm-sand">
                       #{index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span className="text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                           {player.name}
                         </span>
                         {lowConfidence && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                          <span className="tm-chip">
                             Nuevo
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                       {Math.round(player.currentRating)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-tm-oxide/70 dark:text-tm-sand/70">
                       {player.gamesPlayed}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-tm-oxide/70 dark:text-tm-sand/70">
                       {winRate.toFixed(1)}%
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -151,10 +159,10 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
                         <span
                           className={
                             ratingChange > 0
-                              ? 'text-green-600 dark:text-green-400'
+                              ? 'text-tm-teal'
                               : ratingChange < 0
-                              ? 'text-red-600 dark:text-red-400'
-                              : 'text-gray-500 dark:text-gray-400'
+                              ? 'text-tm-copper-dark'
+                              : 'text-tm-oxide/60 dark:text-tm-sand/60'
                           }
                         >
                           {formatRatingChange(ratingChange)}

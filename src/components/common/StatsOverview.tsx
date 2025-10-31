@@ -44,21 +44,21 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
   }, null as Player | null);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Total Games */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
+      <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Total de Partidas
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
+            <p className="mt-3 text-3xl font-bold text-tm-copper dark:text-tm-glow">
               {totalGames}
             </p>
           </div>
-          <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/20 text-tm-copper">
             <svg
-              className="w-8 h-8 text-blue-600 dark:text-blue-400"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -75,30 +75,30 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       </div>
 
       {/* Last Game */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
+      <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+        <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Última Partida
             </p>
             {lastGame ? (
-              <div className="mt-2">
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+              <div className="mt-3">
+                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
                   {lastGameWinner?.name || 'Desconocido'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                   {lastGameDate && formatDate(lastGameDate)}
                 </p>
               </div>
             ) : (
-              <p className="text-lg font-medium text-gray-400 dark:text-gray-500 mt-2">
+              <p className="mt-3 text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
                 Aún no hay partidas
               </p>
             )}
           </div>
-          <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex-shrink-0 ml-4">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-glow/20 text-tm-copper-dark">
             <svg
-              className="w-8 h-8 text-yellow-600 dark:text-yellow-400"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -115,30 +115,30 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       </div>
 
       {/* Top Rated Player */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
+      <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+        <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Mejor Rating
             </p>
             {topPlayer ? (
-              <div className="mt-2">
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+              <div className="mt-3">
+                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
                   {topPlayer.name}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                   {Math.round(topPlayer.currentRating)} puntos
                 </p>
               </div>
             ) : (
-              <p className="text-lg font-medium text-gray-400 dark:text-gray-500 mt-2">
+              <p className="mt-3 text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
                 Sin jugadores
               </p>
             )}
           </div>
-          <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full flex-shrink-0 ml-4">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-teal/20 text-tm-teal">
             <svg
-              className="w-8 h-8 text-purple-600 dark:text-purple-400"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -155,30 +155,30 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       </div>
 
       {/* Most Active Player */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
+      <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+        <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Más Activo
             </p>
             {mostActivePlayer ? (
-              <div className="mt-2">
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+              <div className="mt-3">
+                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
                   {mostActivePlayer.name}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                   {mostActivePlayer.gamesPlayed} {mostActivePlayer.gamesPlayed === 1 ? 'partida' : 'partidas'}
                 </p>
               </div>
             ) : (
-              <p className="text-lg font-medium text-gray-400 dark:text-gray-500 mt-2">
+              <p className="mt-3 text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
                 Sin jugadores
               </p>
             )}
           </div>
-          <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full flex-shrink-0 ml-4">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/20 text-tm-copper-dark">
             <svg
-              className="w-8 h-8 text-green-600 dark:text-green-400"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

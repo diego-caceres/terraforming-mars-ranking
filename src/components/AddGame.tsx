@@ -92,19 +92,21 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="tm-card p-6 space-y-6">
+      <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
         Registrar Resultado de Partida
       </h2>
 
       {showSuccess && (
-        <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md">
-          <div className="flex items-center justify-between">
-            <span>¡Partida registrada exitosamente! Los ratings han sido actualizados.</span>
+        <div className="rounded-lg border border-tm-teal/40 bg-tm-teal/15 px-4 py-3 text-sm text-tm-teal dark:bg-tm-teal/20 dark:text-tm-glow">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <span className="font-semibold uppercase tracking-wide">
+              ¡Partida registrada exitosamente! Los ratings han sido actualizados.
+            </span>
             {canUndo && (
               <button
                 onClick={handleUndo}
-                className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium transition-colors text-sm"
+                className="tm-button-secondary md:ml-4"
               >
                 Deshacer Última Partida
               </button>
@@ -116,7 +118,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
       <form onSubmit={handleSubmit}>
         {/* Game Date */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
             Fecha de la Partida
           </label>
           <input
@@ -124,28 +126,28 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
             value={gameDate}
             onChange={(e) => setGameDate(e.target.value)}
             max={new Date().toISOString().split('T')[0]}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
           />
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
             Seleccioná la fecha en que se jugó esta partida
           </p>
         </div>
 
         {/* Expansions */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
             Expansiones Usadas (Opcional)
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
             {AVAILABLE_EXPANSIONS.map(expansion => (
               <button
                 key={expansion}
                 type="button"
                 onClick={() => toggleExpansion(expansion)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`rounded-full px-4 py-1.5 transition-all ${
                   selectedExpansions.includes(expansion)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                    : 'border border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
                 }`}
               >
                 {expansion}
@@ -156,7 +158,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
 
         {/* Generations */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
             Número de Generaciones (Opcional)
           </label>
           <input
@@ -166,32 +168,32 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
             value={generations}
             onChange={(e) => setGenerations(e.target.value)}
             placeholder="Ingresá un número (1-16)"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
           />
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
             ¿Cuántas generaciones se jugaron en esta partida?
           </p>
         </div>
 
         {/* Player Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
             Seleccionar Jugadores
           </label>
           {availablePlayers.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-tm-oxide/60 dark:text-tm-sand/60">
               {playerArray.length === 0
                 ? 'No hay jugadores disponibles. Por favor agregá jugadores primero.'
                 : 'Todos los jugadores han sido seleccionados.'}
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
               {availablePlayers.map(player => (
                 <button
                   key={player.id}
                   type="button"
                   onClick={() => handleAddPlayer(player.id)}
-                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md transition-colors text-sm font-medium"
+                  className="rounded-md border border-tm-copper/40 bg-white/75 px-4 py-2 text-tm-oxide transition-all hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
                 >
                   {player.name}
                 </button>
@@ -203,10 +205,10 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
         {/* Placement Order */}
         {placements.length > 0 && (
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
               Orden de Posiciones (Arrastrá para reordenar)
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mb-3">
               Arriba = 1er lugar, Abajo = Último lugar
             </p>
 
@@ -216,10 +218,10 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`space-y-2 p-4 rounded-md border-2 border-dashed ${
+                    className={`space-y-2 rounded-lg border-2 border-dashed p-4 ${
                       snapshot.isDraggingOver
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-300 dark:border-gray-600'
+                        ? 'border-tm-copper bg-tm-copper/10 dark:bg-tm-copper/15'
+                        : 'border-tm-copper/40 dark:border-tm-copper/30'
                     }`}
                   >
                     {placements.map((playerId, index) => {
@@ -231,27 +233,27 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`flex items-center gap-3 p-3 rounded-md ${
+                              className={`flex items-center gap-3 rounded-lg border border-white/20 px-4 py-3 shadow-sm ${
                                 snapshot.isDragging
-                                  ? 'bg-blue-100 dark:bg-blue-900 shadow-lg'
-                                  : 'bg-white dark:bg-gray-700 shadow'
+                                  ? 'bg-tm-copper/10 dark:bg-tm-copper/15'
+                                  : 'bg-white/90 dark:bg-tm-haze/90'
                               }`}
                             >
-                              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full font-bold text-sm">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-tm-copper to-tm-copper-dark text-sm font-bold text-white shadow">
                                 {index + 1}
                               </div>
                               <div className="flex-1">
-                                <div className="font-medium text-gray-900 dark:text-gray-100">
+                                <div className="font-semibold text-tm-oxide dark:text-tm-sand">
                                   {player?.name}
                                 </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                                   Rating Actual: {Math.round(player?.currentRating || 0)}
                                 </div>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => handleRemovePlayer(playerId)}
-                                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
+                                className="text-xs font-semibold uppercase tracking-wide text-tm-copper-dark hover:text-tm-copper"
                               >
                                 Remove
                               </button>
@@ -273,7 +275,9 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
           <button
             type="submit"
             disabled={placements.length < 2}
-            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-md font-medium transition-colors"
+            className={`flex-1 tm-button-primary justify-center disabled:pointer-events-none ${
+              placements.length < 2 ? 'cursor-not-allowed opacity-60' : ''
+            }`}
           >
             Record Game
           </button>
@@ -281,7 +285,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
             <button
               type="button"
               onClick={handleReset}
-              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md font-medium transition-colors"
+              className="rounded-md border border-tm-copper/40 bg-white/75 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-tm-oxide transition-colors hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
             >
               Reset
             </button>

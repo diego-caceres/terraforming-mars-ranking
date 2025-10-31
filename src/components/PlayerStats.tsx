@@ -39,88 +39,97 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="tm-card relative w-full max-h-[90vh] max-w-4xl overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
+        <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="tm-card-subtitle">Expediente de Piloto</p>
+            <h2 className="text-2xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
               {stats.player.name}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Miembro desde {formatDate(stats.player.createdAt)}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl font-bold"
+            className="rounded-full border border-tm-copper/30 p-2 text-tm-oxide transition-colors hover:bg-tm-copper/10 hover:text-tm-copper-dark dark:border-white/20 dark:text-tm-sand dark:hover:bg-white/10"
           >
-            ×
+            <span className="text-xl leading-none">×</span>
           </button>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+              <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
+                Rating Actual
+              </div>
+              <div className="mt-2 text-3xl font-bold text-tm-copper dark:text-tm-glow">
                 {Math.round(stats.player.currentRating)}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Rating Actual</div>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+            <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+              <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
+                Partidas Jugadas
+              </div>
+              <div className="mt-2 text-3xl font-bold text-tm-oxide dark:text-tm-sand">
                 {stats.player.gamesPlayed}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Partidas Jugadas</div>
             </div>
-            <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+            <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+              <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
+                % de Victorias
+              </div>
+              <div className="mt-2 text-3xl font-bold text-tm-teal">
                 {stats.winRate.toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">% de Victorias</div>
             </div>
-            <div className="bg-orange-50 dark:bg-orange-900/30 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+            <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+              <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
+                Posición Promedio
+              </div>
+              <div className="mt-2 text-3xl font-bold text-tm-copper-dark">
                 {stats.averagePlacement.toFixed(1)}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Posición Promedio</div>
             </div>
           </div>
 
           {/* Rating History Chart */}
           {chartData.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
                 Historial de Rating
               </h3>
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <div className="rounded-lg border border-tm-copper/20 bg-white/85 p-4 dark:border-white/10 dark:bg-tm-haze/80">
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(216,108,41,0.25)" />
                     <XAxis
                       dataKey="game"
                       label={{ value: 'Número de Partida', position: 'insideBottom', offset: -5 }}
-                      stroke="#9CA3AF"
+                      stroke="#8c6b4f"
                     />
                     <YAxis
                       label={{ value: 'Rating', angle: -90, position: 'insideLeft' }}
-                      stroke="#9CA3AF"
+                      stroke="#8c6b4f"
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#1F2937',
+                        backgroundColor: '#201c29',
                         border: 'none',
                         borderRadius: '0.375rem',
-                        color: '#F3F4F6',
+                        color: '#f5e0c3',
                       }}
                     />
                     <Line
                       type="monotone"
                       dataKey="rating"
-                      stroke="#3B82F6"
+                      stroke="#d86c29"
                       strokeWidth={2}
-                      dot={{ fill: '#3B82F6', r: 4 }}
+                      dot={{ fill: '#d86c29', r: 4 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -131,34 +140,34 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {/* Head-to-Head Records */}
           {headToHeads.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
                 Récords Cara a Cara
               </h3>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
+              <div className="overflow-hidden rounded-lg border border-tm-copper/20 bg-white/85 dark:border-white/10 dark:bg-tm-haze/80">
                 <table className="w-full">
-                  <thead className="bg-gray-100 dark:bg-gray-800">
+                  <thead className="bg-tm-copper/10 text-[0.65rem] uppercase tracking-[0.3em] text-tm-oxide/70 dark:bg-white/5 dark:text-tm-sand/70">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      <th className="px-4 py-3 text-left">
                         Oponente
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      <th className="px-4 py-3 text-center">
                         Partidas
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      <th className="px-4 py-3 text-center">
                         Victorias
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      <th className="px-4 py-3 text-center">
                         Derrotas
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      <th className="px-4 py-3 text-center">
                         Empates
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      <th className="px-4 py-3 text-center">
                         % Victorias
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+                  <tbody className="divide-y divide-tm-copper/15 dark:divide-white/10">
                     {headToHeads.map(record => {
                       const opponent = allPlayers[record.opponentId];
                       const winPercentage = record.gamesPlayed > 0
@@ -167,22 +176,22 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
 
                       return (
                         <tr key={record.opponentId}>
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <td className="px-4 py-3 text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                             {opponent?.name || 'Desconocido'}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
+                          <td className="px-4 py-3 text-sm text-center text-tm-oxide/70 dark:text-tm-sand/70">
                             {record.gamesPlayed}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center text-green-600 dark:text-green-400 font-medium">
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-tm-teal">
                             {record.wins}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center text-red-600 dark:text-red-400 font-medium">
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-tm-copper-dark">
                             {record.losses}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
+                          <td className="px-4 py-3 text-sm text-center text-tm-oxide/70 dark:text-tm-sand/70">
                             {record.ties}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center font-medium text-gray-900 dark:text-gray-100">
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-tm-oxide dark:text-tm-sand">
                             {winPercentage.toFixed(0)}%
                           </td>
                         </tr>
@@ -197,7 +206,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {/* Recent Games */}
           {stats.recentGames.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
                 Partidas Recientes
               </h3>
               <div className="space-y-2">
@@ -208,11 +217,11 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                   return (
                     <div
                       key={game.id}
-                      className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+                      className="rounded-lg border border-tm-copper/20 bg-white/85 p-4 dark:border-white/10 dark:bg-tm-haze/80"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <span className="text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                             Posición #{placement + 1} de {game.placements.length}
                           </span>
                         </div>
@@ -220,20 +229,20 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                           <span
                             className={`text-sm font-bold ${
                               ratingChange > 0
-                                ? 'text-green-600 dark:text-green-400'
+                                ? 'text-tm-teal'
                                 : ratingChange < 0
-                                ? 'text-red-600 dark:text-red-400'
-                                : 'text-gray-600 dark:text-gray-400'
+                                ? 'text-tm-copper-dark'
+                                : 'text-tm-oxide/60 dark:text-tm-sand/60'
                             }`}
                           >
                             {ratingChange > 0 ? '+' : ''}{ratingChange}
                           </span>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                             {formatDate(game.date)}
                           </div>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-xs text-tm-oxide/70 dark:text-tm-sand/70">
                         Jugadores: {game.placements.map(id => allPlayers[id]?.name || 'Desconocido').join(', ')}
                       </div>
                     </div>

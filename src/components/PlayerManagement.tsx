@@ -41,20 +41,20 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="tm-card p-6 space-y-6">
+      <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
         Gestión de Jugadores
       </h2>
 
       {showSuccess && (
-        <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md">
+        <div className="rounded-lg border border-tm-teal/40 bg-tm-teal/15 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-tm-teal dark:bg-tm-teal/20 dark:text-tm-glow">
           ¡Jugador agregado exitosamente!
         </div>
       )}
 
       {/* Add Player Form */}
-      <form onSubmit={handleSubmit} className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
           Agregar Nuevo Jugador
         </label>
         <div className="flex gap-2">
@@ -63,52 +63,52 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}
             placeholder="Ingresá el nombre del jugador"
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
             maxLength={50}
           />
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
+            className="tm-button-primary"
           >
             Agregar Jugador
           </button>
         </div>
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
           Los jugadores nuevos empiezan con un rating de 1500
         </p>
       </form>
 
       {/* Player List */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+      <div className="space-y-3">
+        <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
           Todos los Jugadores ({playerArray.length})
         </h3>
 
         {playerArray.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-tm-oxide/60 dark:text-tm-sand/60">
             Aún no hay jugadores. ¡Agregá tu primer jugador arriba!
           </p>
         ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
             {playerArray.map(player => (
               <div
                 key={player.id}
                 onClick={() => onPlayerClick(player.id)}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition-colors"
+                className="flex items-center justify-between rounded-lg border border-tm-copper/30 bg-white/80 px-4 py-3 transition-colors hover:bg-white dark:border-white/10 dark:bg-tm-haze/80 dark:hover:bg-tm-haze/70 cursor-pointer"
               >
                 <div>
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                  <div className="font-semibold text-tm-oxide dark:text-tm-sand">
                     {player.name}
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 uppercase tracking-wide">
                     {player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida jugada' : 'partidas jugadas'}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  <div className="text-lg font-bold text-tm-oxide dark:text-tm-glow">
                     {Math.round(player.currentRating)}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-[0.65rem] uppercase tracking-[0.2em] text-tm-oxide/60 dark:text-tm-sand/60">
                     Rating
                   </div>
                 </div>

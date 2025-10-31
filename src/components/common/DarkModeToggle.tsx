@@ -7,12 +7,16 @@ export default function DarkModeToggle({ darkMode, onToggle }: DarkModeTogglePro
   return (
     <button
       onClick={onToggle}
-      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+      className={`p-2 rounded-full border transition-all duration-200 ${
+        darkMode
+          ? 'border-white/30 bg-white/10 text-white hover:bg-white/20'
+          : 'border-tm-copper/40 bg-white/80 text-tm-oxide hover:bg-white'
+      }`}
       aria-label="Toggle dark mode"
     >
       {darkMode ? (
         <svg
-          className="w-5 h-5 text-yellow-500"
+          className="w-5 h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -26,7 +30,7 @@ export default function DarkModeToggle({ darkMode, onToggle }: DarkModeTogglePro
         </svg>
       ) : (
         <svg
-          className="w-5 h-5 text-gray-700"
+          className="w-5 h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

@@ -4,6 +4,66 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply min-h-screen bg-tm-sand text-tm-oxide font-body antialiased transition-colors duration-300;
+    background-image:
+      radial-gradient(ellipse at top, rgba(44, 125, 160, 0.22), transparent 65%),
+      radial-gradient(ellipse at bottom, rgba(216, 108, 41, 0.24), transparent 55%),
+      url('/mars.png');
+    background-attachment: fixed, fixed, fixed;
+    background-size: 140% 120%, 120% 100%, cover;
+    background-position: center top, center bottom, center;
+    background-repeat: no-repeat;
+  }
+
+  .dark body {
+    @apply bg-tm-night text-tm-sand;
+    background-image:
+      radial-gradient(ellipse at top, rgba(44, 125, 160, 0.35), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(216, 108, 41, 0.35), transparent 55%),
+      url('/mars.png');
+    background-size: 160% 130%, 130% 100%, cover;
+    background-position: center top, center bottom, center;
+  }
+}
+
+@layer components {
+  .tm-card {
+    @apply rounded-xl border border-tm-copper/25 bg-white/90 dark:bg-tm-haze/90 backdrop-blur-md shadow-tm-card;
+  }
+
+  .tm-card-header {
+    @apply border-b border-tm-copper/30 bg-gradient-to-r from-tm-copper/15 via-transparent to-transparent dark:from-tm-copper/20;
+  }
+
+  .tm-card-title {
+    @apply font-heading text-lg tracking-widest uppercase text-tm-oxide dark:text-tm-sand;
+    letter-spacing: 0.35em;
+  }
+
+  .tm-card-subtitle {
+    @apply text-xs uppercase text-tm-oxide/70 dark:text-tm-sand/70;
+    letter-spacing: 0.2em;
+  }
+
+  .tm-button-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-tm-copper/60 bg-gradient-to-r from-tm-copper to-tm-copper-dark px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-tm-glow/60 focus:ring-offset-2 focus:ring-offset-tm-sand dark:focus:ring-offset-tm-night;
+  }
+
+  .tm-button-primary:hover {
+    transform: scale(1.02);
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+
+  .tm-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-tm-glow/40;
+  }
+
+  .tm-chip {
+    @apply inline-flex items-center rounded-full border border-tm-copper/40 bg-tm-copper/15 px-3 py-1 text-[0.65rem] font-semibold uppercase text-tm-copper dark:text-tm-glow dark:bg-tm-copper/10;
+    letter-spacing: 0.25em;
+  }
+
+  .tm-surface {
+    @apply bg-white/80 dark:bg-tm-haze/80 backdrop-blur-md;
   }
 }

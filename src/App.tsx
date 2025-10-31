@@ -99,26 +99,29 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80 backdrop-blur-xl">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+      <header className="bg-gradient-to-r from-tm-copper via-tm-copper-dark to-tm-oxide text-white shadow-lg border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div>
+              <p className="tm-card-subtitle text-white/70">Liga Los del Cuadrito</p>
+              <h1 className="text-3xl md:text-4xl font-heading tracking-[0.4em] uppercase">
               Rankings de Terraforming Mars
             </h1>
-            <div className="flex items-center space-x-4">
+            </div>
+            <div className="flex items-center gap-3">
               {isAuthenticated ? (
                 <button
                   onClick={() => setIsAuthenticated(false)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                  className="tm-button-secondary border-white/40 bg-white/10 hover:bg-white/20"
                 >
                   Cerrar sesión
                 </button>
               ) : (
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="tm-button-secondary border-white/30 bg-white/15 hover:bg-white/25"
                 >
                   Iniciar sesión
                 </button>
@@ -130,55 +133,55 @@ function App() {
       </header>
 
       {/* Navigation */}
-      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <nav className="border-b border-tm-copper/30 bg-white/85 dark:bg-tm-haze/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
+          <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={() => setActiveTab('rankings')}
-              className={`px-3 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
                 activeTab === 'rankings'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
+                  : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
               Rankings
             </button>
             <button
               onClick={() => setActiveTab('addGame')}
-              className={`px-3 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
                 activeTab === 'addGame'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
+                  : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
               Registrar partida
             </button>
             <button
               onClick={() => setActiveTab('players')}
-              className={`px-3 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
                 activeTab === 'players'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
+                  : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
               Jugadores
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-3 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
                 activeTab === 'history'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
+                  : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
               Historial
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-3 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
                 activeTab === 'settings'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
+                  : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
               Configuración
@@ -188,17 +191,17 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         {activeTab === 'rankings' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <StatsOverview games={games} players={players} />
             <div className="flex justify-end">
               <button
                 onClick={handleToggleActiveFilter}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`rounded-md px-5 py-2 text-xs sm:text-sm font-semibold uppercase tracking-wide transition-all duration-200 ${
                   activeOnly
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                    : 'border border-tm-copper/40 bg-white/80 text-tm-oxide dark:bg-tm-haze/80 dark:text-tm-sand hover:bg-white'
                 }`}
               >
                 {activeOnly ? 'Mostrando Jugadores Activos' : 'Mostrar Solo Activos'}
@@ -236,14 +239,14 @@ function App() {
               onAuthenticationRequired={() => setShowLoginModal(true)}
             />
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            <div className="tm-card p-6 space-y-4">
+              <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
                 Acerca del Sistema Elo
               </h3>
-              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+              <div className="space-y-3 text-sm text-tm-oxide/80 dark:text-tm-sand/80">
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Características principales:</h4>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
+                  <h4 className="font-semibold text-tm-oxide dark:text-tm-sand mb-2">Características principales:</h4>
+                  <ul className="ml-4 space-y-1 marker:text-tm-copper list-disc">
                     <li><strong>K-Factor: 40</strong> - Determina qué tan rápido cambian los ratings después de cada partida</li>
                     <li><strong>Rating Inicial: 1500</strong> - Todos los jugadores nuevos empiezan con este puntaje</li>
                     <li><strong>Umbral de Confianza: 10 partidas</strong> - Los jugadores con menos de 10 partidas se marcan como "Nuevo"</li>
@@ -251,7 +254,7 @@ function App() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Cómo funciona:</h4>
+                  <h4 className="font-semibold text-tm-oxide dark:text-tm-sand mb-2">Cómo funciona:</h4>
                   <p className="mb-2">
                     En este sistema multijugador, cada jugador es comparado contra <strong>todos los demás jugadores</strong> en la partida.
                     Para cada par de jugadores:
@@ -259,13 +262,13 @@ function App() {
                   <ol className="list-decimal list-inside space-y-1 ml-2">
                     <li>Se calcula la <strong>probabilidad esperada</strong> de ganar basada en la diferencia de ratings</li>
                     <li>Se determina el <strong>resultado real</strong>: 1.0 = victoria, 0.5 = empate, 0.0 = derrota</li>
-                    <li>El cambio de rating se calcula como: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">Cambio = K × (Resultado Real - Resultado Esperado)</code></li>
+                    <li>El cambio de rating se calcula como: <code className="rounded bg-tm-copper/20 px-1 text-xs font-mono uppercase tracking-wide dark:bg-tm-haze/80">Cambio = K × (Resultado Real - Resultado Esperado)</code></li>
                     <li>Se suman todos los cambios de cada comparación para obtener el cambio total del jugador</li>
                   </ol>
                 </div>
 
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border-l-4 border-blue-500">
-                  <p className="text-blue-900 dark:text-blue-200">
+                <div className="rounded-md border border-tm-copper/30 bg-tm-copper/10 p-4 text-sm text-tm-oxide dark:border-white/10 dark:bg-tm-haze/70 dark:text-tm-sand">
+                  <p className="font-semibold text-tm-oxide dark:text-tm-sand">
                     <strong>Ejemplo:</strong> Si terminás 1° en una partida de 4 jugadores, tu rating aumenta más si venciste
                     a jugadores con rating alto que si venciste a jugadores con rating bajo. El sistema recompensa ganarle a
                     oponentes fuertes y penaliza perder contra oponentes débiles.

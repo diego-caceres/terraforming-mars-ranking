@@ -69,33 +69,33 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="tm-card p-6 space-y-4">
+      <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
         Backup & Restore
       </h3>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-md text-sm">
+        <div className="rounded-md border border-tm-copper-dark/40 bg-tm-copper-dark/10 p-3 text-sm font-semibold uppercase tracking-wide text-tm-copper-dark dark:bg-tm-copper-dark/20 dark:text-tm-glow">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md text-sm">
+        <div className="rounded-md border border-tm-teal/40 bg-tm-teal/15 p-3 text-sm font-semibold uppercase tracking-wide text-tm-teal dark:bg-tm-teal/20 dark:text-tm-glow">
           {success}
         </div>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <button
           onClick={handleExport}
-          className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors text-sm"
+          className="flex-1 tm-button-primary justify-center"
         >
           Export Data
         </button>
         <button
           onClick={handleImport}
-          className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md font-medium transition-colors text-sm"
+          className="flex-1 rounded-md border border-tm-copper/40 bg-white/75 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-tm-oxide transition-colors hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
         >
           Import Data
         </button>
@@ -109,7 +109,7 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
         className="hidden"
       />
 
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
         Export your data to back it up, or import a previously exported file to restore your rankings.
       </p>
     </div>
