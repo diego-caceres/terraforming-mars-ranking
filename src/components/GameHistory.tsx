@@ -18,13 +18,6 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
     });
   };
 
-  const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const getPlayerName = (playerId: string) => {
     return players[playerId]?.name || 'Unknown Player';
   };
@@ -91,16 +84,30 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                         <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {formatDate(game.date)}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {formatTime(game.date)}
-                        </span>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                           {game.placements.length} players
                         </span>
+                        {game.generations && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            {game.generations} gen
+                          </span>
+                        )}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         Winner: <span className="font-semibold text-gray-900 dark:text-gray-100">{winner?.name}</span>
                       </div>
+                      {game.expansions && game.expansions.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {game.expansions.map(expansion => (
+                            <span
+                              key={expansion}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                            >
+                              {expansion}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -206,6 +213,22 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                             {game.placements.map(id => getPlayerName(id)).join(', ')}
                           </span>
                         </div>
+                        {game.generations && (
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">Generations:</span>
+                            <span className="ml-2 text-gray-900 dark:text-gray-100">
+                              {game.generations}
+                            </span>
+                          </div>
+                        )}
+                        {game.expansions && game.expansions.length > 0 && (
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">Expansions:</span>
+                            <span className="ml-2 text-gray-900 dark:text-gray-100">
+                              {game.expansions.join(', ')}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

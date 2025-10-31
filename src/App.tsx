@@ -40,8 +40,8 @@ function App() {
     loadData();
   };
 
-  const handleRecordGame = (placements: string[], gameDate: number) => {
-    recordGame({ playerIds: placements, placements }, gameDate);
+  const handleRecordGame = (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
+    recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
     loadData();
   };
 

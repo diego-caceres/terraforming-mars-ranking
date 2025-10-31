@@ -84,6 +84,8 @@ export function recordGame(gameResult: GameResult, customDate?: number): Game {
     date: customDate || Date.now(),
     placements: gameResult.placements,
     ratingChanges: {},
+    expansions: gameResult.expansions,
+    generations: gameResult.generations,
   };
 
   // Calculate Elo changes
