@@ -6,13 +6,15 @@ import type { Player } from '../types';
 interface AddGameProps {
   players: Record<string, Player>;
   onSubmit: (placements: string[], gameDate: number) => void;
+  onUndo: () => void;
 }
 
-export default function AddGame({ players, onSubmit }: AddGameProps) {
+export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [placements, setPlacements] = useState<string[]>([]);
   const [gameDate, setGameDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
 
   const playerArray = Object.values(players);
   const availablePlayers = playerArray.filter(p => !selectedPlayers.includes(p.id));
@@ -51,7 +53,17 @@ export default function AddGame({ players, onSubmit }: AddGameProps) {
     setPlacements([]);
     setGameDate(new Date().toISOString().split('T')[0]);
     setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setCanUndo(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      setCanUndo(false);
+    }, 10000); // 10 seconds to undo
+  };
+
+  const handleUndo = () => {
+    onUndo();
+    setShowSuccess(false);
+    setCanUndo(false);
   };
 
   const handleReset = () => {
@@ -67,7 +79,17 @@ export default function AddGame({ players, onSubmit }: AddGameProps) {
 
       {showSuccess && (
         <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md">
-          Game recorded successfully! Ratings have been updated.
+          <div className="flex items-center justify-between">
+            <span>Game recorded successfully! Ratings have been updated.</span>
+            {canUndo && (
+              <button
+                onClick={handleUndo}
+                className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium transition-colors text-sm"
+              >
+                Undo Last Game
+              </button>
+            )}
+          </div>
         </div>
       )}
 

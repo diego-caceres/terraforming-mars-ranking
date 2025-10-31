@@ -101,6 +101,96 @@ export function recordGame(gameResult: GameResult, customDate?: number): Game {
 }
 
 /**
+ * Delete the last game and revert rating changes
+ */
+export function deleteLastGame(): boolean {
+  const data = loadData();
+
+  if (data.games.length === 0) {
+    return false; // No games to delete
+  }
+
+  // Get the last game
+  const lastGame = data.games[data.games.length - 1];
+
+  // Revert rating changes for all players in the game
+  lastGame.placements.forEach(playerId => {
+    const player = data.players[playerId];
+    if (!player) return;
+
+    const ratingChange = lastGame.ratingChanges[playerId] || 0;
+
+    // Remove the rating change
+    const newRating = player.currentRating - ratingChange;
+
+    // Check if this was a win (1st place)
+    const wasWin = lastGame.placements[0] === playerId;
+
+    // Remove the last entry from rating history
+    const newRatingHistory = player.ratingHistory.filter(
+      entry => entry.gameId !== lastGame.id
+    );
+
+    data.players[playerId] = {
+      ...player,
+      currentRating: newRating,
+      gamesPlayed: player.gamesPlayed - 1,
+      wins: player.wins - (wasWin ? 1 : 0),
+      ratingHistory: newRatingHistory,
+    };
+  });
+
+  // Remove the game from history
+  data.games.pop();
+
+  saveData(data);
+
+  return true;
+}
+
+/**
+ * Delete a specific game by ID and recalculate all ratings from scratch
+ * This ensures rating consistency when deleting games from the middle of history
+ */
+export function deleteGameById(gameId: string): boolean {
+  const data = loadData();
+
+  // Find the game index
+  const gameIndex = data.games.findIndex(g => g.id === gameId);
+  if (gameIndex === -1) {
+    return false; // Game not found
+  }
+
+  // Remove the game from the list
+  data.games.splice(gameIndex, 1);
+
+  // Reset all players to starting state
+  Object.keys(data.players).forEach(playerId => {
+    const player = data.players[playerId];
+    data.players[playerId] = {
+      ...player,
+      currentRating: getStartingRating(),
+      gamesPlayed: 0,
+      wins: 0,
+      ratingHistory: [],
+    };
+  });
+
+  // Replay all remaining games in chronological order
+  data.games.forEach(game => {
+    // Recalculate Elo changes
+    game.ratingChanges = calculateEloChanges(game.placements, data.players);
+
+    // Apply rating changes
+    data.players = applyRatingChanges(data.players, game);
+  });
+
+  saveData(data);
+
+  return true;
+}
+
+/**
  * Get all players sorted by rating
  */
 export function getRankings(activeOnly: boolean = false): Player[] {

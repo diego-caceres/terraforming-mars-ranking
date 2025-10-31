@@ -7,7 +7,7 @@ import GameHistory from './components/GameHistory';
 import DarkModeToggle from './components/common/DarkModeToggle';
 import ExportImport from './components/common/ExportImport';
 import { useDarkMode } from './hooks/useDarkMode';
-import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames } from './services/storageService';
+import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/storageService';
 import type { Player, Game } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -42,6 +42,20 @@ function App() {
   const handleRecordGame = (placements: string[], gameDate: number) => {
     recordGame({ playerIds: placements, placements }, gameDate);
     loadData();
+  };
+
+  const handleUndoLastGame = () => {
+    const success = deleteLastGame();
+    if (success) {
+      loadData();
+    }
+  };
+
+  const handleDeleteGame = (gameId: string) => {
+    const success = deleteGameById(gameId);
+    if (success) {
+      loadData();
+    }
   };
 
   const handlePlayerClick = (playerId: string) => {
@@ -161,7 +175,7 @@ function App() {
         )}
 
         {activeTab === 'addGame' && (
-          <AddGame players={players} onSubmit={handleRecordGame} />
+          <AddGame players={players} onSubmit={handleRecordGame} onUndo={handleUndoLastGame} />
         )}
 
         {activeTab === 'players' && (
@@ -173,7 +187,7 @@ function App() {
         )}
 
         {activeTab === 'history' && (
-          <GameHistory games={games} players={players} />
+          <GameHistory games={games} players={players} onDeleteGame={handleDeleteGame} />
         )}
 
         {activeTab === 'settings' && (
