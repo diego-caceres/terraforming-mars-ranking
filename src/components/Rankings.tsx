@@ -7,11 +7,12 @@ interface RankingsProps {
   players: Player[];
   activeOnly: boolean;
   onPlayerClick: (playerId: string) => void;
+  onToggleActiveFilter: () => void;
 }
 
 type ViewMode = 'allTime' | 'monthly';
 
-export default function Rankings({ players, activeOnly, onPlayerClick }: RankingsProps) {
+export default function Rankings({ players, activeOnly, onPlayerClick, onToggleActiveFilter }: RankingsProps) {
   const [sortBy, setSortBy] = useState<'rating' | 'games' | 'winRate'>('rating');
   const [viewMode, setViewMode] = useState<ViewMode>('allTime');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -84,9 +85,16 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
               Rankings
             </h2>
           </div>
-          {activeOnly && (
-            <span className="tm-chip self-start sm:self-center">Jugadores Activos</span>
-          )}
+          <button
+            onClick={onToggleActiveFilter}
+            className={`rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all self-start sm:self-center ${
+              activeOnly
+                ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                : 'border border-tm-copper/40 bg-white/80 text-tm-oxide dark:bg-tm-haze/80 dark:text-tm-sand hover:bg-white'
+            }`}
+          >
+            {activeOnly ? 'Mostrando Activos' : 'Mostrar Solo Activos'}
+          </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button

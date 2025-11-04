@@ -83,6 +83,14 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
     date: new Date(entry.date).toLocaleDateString(),
   }));
 
+  // Calculate Y-axis domain with padding for better zoom
+  const ratings = chartData.map(d => d.rating);
+  const minRating = Math.min(...ratings);
+  const maxRating = Math.max(...ratings);
+  const padding = (maxRating - minRating) * 0.1 || 50; // 10% padding or 50 points minimum
+  const yAxisMin = Math.floor(minRating - padding);
+  const yAxisMax = Math.ceil(maxRating + padding);
+
   const formatDate = (timestamp: number | null) => {
     if (!timestamp) return 'Nunca';
     return new Date(timestamp).toLocaleDateString();
@@ -165,6 +173,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                     <YAxis
                       label={{ value: 'Rating', angle: -90, position: 'insideLeft' }}
                       stroke="#8c6b4f"
+                      domain={[yAxisMin, yAxisMax]}
                     />
                     <Tooltip
                       contentStyle={{

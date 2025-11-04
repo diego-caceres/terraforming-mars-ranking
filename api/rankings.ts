@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv, KEYS } from './_lib/kv';
 import type { Player } from './_lib/types';
 
-const DAYS_30_MS = 30 * 24 * 60 * 60 * 1000;
+const DAYS_45_MS = 45 * 24 * 60 * 60 * 1000;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       filteredPlayers = filteredPlayers.filter((player) => {
         if (player.ratingHistory.length === 0) return false;
         const lastGameDate = player.ratingHistory[player.ratingHistory.length - 1]?.date || 0;
-        return now - lastGameDate <= DAYS_30_MS;
+        return now - lastGameDate <= DAYS_45_MS;
       });
     }
 

@@ -170,7 +170,7 @@ function App() {
     <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80 backdrop-blur-xl">
       {/* Header */}
       <header className="bg-gradient-to-r from-tm-copper via-tm-copper-dark to-tm-oxide text-white shadow-lg border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-5">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <p className="tm-card-subtitle text-white/70">Liga Los del Cuadrito</p>
@@ -202,7 +202,7 @@ function App() {
 
       {/* Navigation */}
       <nav className="border-b border-tm-copper/30 bg-white/85 dark:bg-tm-haze/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
           <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={() => setActiveTab('rankings')}
@@ -259,7 +259,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <main className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-10 space-y-8">
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tm-copper"></div>
@@ -283,22 +283,11 @@ function App() {
         {!loading && !error && activeTab === 'rankings' && (
           <div className="space-y-6">
             <StatsOverview games={games} players={players} />
-            <div className="flex justify-end">
-              <button
-                onClick={handleToggleActiveFilter}
-                className={`rounded-md px-5 py-2 text-xs sm:text-sm font-semibold uppercase tracking-wide transition-all duration-200 ${
-                  activeOnly
-                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
-                    : 'border border-tm-copper/40 bg-white/80 text-tm-oxide dark:bg-tm-haze/80 dark:text-tm-sand hover:bg-white'
-                }`}
-              >
-                {activeOnly ? 'Mostrando Jugadores Activos' : 'Mostrar Solo Activos'}
-              </button>
-            </div>
             <Rankings
               players={rankings}
               activeOnly={activeOnly}
               onPlayerClick={handlePlayerClick}
+              onToggleActiveFilter={handleToggleActiveFilter}
             />
           </div>
         )}
