@@ -207,6 +207,25 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
           </p>
         </div>
 
+        {/* Generations */}
+        <div className="mb-6">
+          <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
+            Número de Generaciones (Opcional)
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="16"
+            value={generations}
+            onChange={(e) => setGenerations(e.target.value)}
+            placeholder="Ingresá un número (1-16)"
+            className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
+          />
+          <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+            ¿Cuántas generaciones se jugaron en esta partida?
+          </p>
+        </div>
+
         {/* Expansions */}
         <div className="mb-6">
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
@@ -228,25 +247,6 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Generations */}
-        <div className="mb-6">
-          <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
-            Número de Generaciones (Opcional)
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="16"
-            value={generations}
-            onChange={(e) => setGenerations(e.target.value)}
-            placeholder="Ingresá un número (1-16)"
-            className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
-          />
-          <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-            ¿Cuántas generaciones se jugaron en esta partida?
-          </p>
         </div>
 
         {/* Player Selection */}
