@@ -1,6 +1,6 @@
 # Board Game Ranking Tracker
 
-A modern web application for tracking board game rankings using a multiplayer Elo rating system. Built with React, TypeScript, and Tailwind CSS.
+A modern web application for tracking board game rankings using a multiplayer Elo rating system. Built with React, TypeScript, Tailwind CSS, and Upstash Redis for data persistence.
 
 ## Features
 
@@ -23,24 +23,68 @@ A modern web application for tracking board game rankings using a multiplayer El
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm
+- Upstash account (for Redis database - free tier available)
 
-### Installation
+### Installation & Setup
+
+#### 1. Clone and Install
 
 ```bash
 # Install dependencies
 npm install
-
-# Run the development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
 ```
 
-The app will be available at `http://localhost:5173`
+#### 2. Configure Upstash Redis
+
+1. Create a Redis database in Upstash:
+   - Go to https://console.upstash.com/
+   - Sign up or log in (free tier available)
+   - Click "Create Database"
+   - Choose a name for your database
+   - Select region (Global or closest to your users)
+   - Click "Create"
+   - Navigate to "REST API" tab
+   - Copy `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+
+2. Create `.env.local` file:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Add your Upstash credentials to `.env.local`:
+
+```env
+UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url_here
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token_here
+VITE_AUTH_PASSWORD=your_admin_password_here
+```
+
+#### 3. Run Development Server
+
+```bash
+# Run with Vercel Dev (compiles API routes + runs frontend)
+vercel dev
+```
+
+The app will be available at `http://localhost:3000`
+
+**Note:** Use `vercel dev` directly, NOT `npm run dev`
+
+#### 4. Deploy to Production
+
+```bash
+# Push to connected Git repo (auto-deploys)
+git push origin main
+
+# Or manually deploy
+vercel --prod
+```
+
+Make sure to add environment variables in Vercel Dashboard → Settings → Environment Variables:
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+- `VITE_AUTH_PASSWORD`
 
 ## How It Works
 
@@ -104,6 +148,21 @@ For each player in a game:
 ## Project Structure
 
 ```
+api/                     # Vercel Serverless Functions
+├── _lib/
+│   ├── kv.ts           # Vercel KV configuration
+│   ├── types.ts        # Shared types
+│   └── eloCalculator.ts # Elo calculations (server)
+├── players.ts          # GET/POST players
+├── rankings.ts         # GET rankings
+├── games.ts            # GET/POST games
+├── games/
+│   ├── [id].ts        # GET/DELETE specific game
+│   └── last.ts        # DELETE last game (undo)
+└── players/
+    └── [id]/
+        └── stats.ts   # GET player stats
+
 src/
 ├── components/          # React components
 │   ├── Rankings.tsx     # Rankings table
@@ -114,8 +173,8 @@ src/
 │       ├── DarkModeToggle.tsx
 │       └── ExportImport.tsx
 ├── services/            # Core logic
-│   ├── eloCalculator.ts # Elo rating calculations
-│   └── storageService.ts # localStorage management
+│   ├── eloCalculator.ts # Elo rating calculations (client)
+│   └── apiService.ts    # API client (replaced storageService)
 ├── types/               # TypeScript interfaces
 │   └── index.ts
 ├── hooks/               # Custom React hooks
@@ -131,14 +190,21 @@ src/
 - **Charts**: Recharts
 - **Drag & Drop**: @hello-pangea/dnd
 - **Build Tool**: Vite
-- **Storage**: Browser localStorage
+- **Backend**: Vercel Serverless Functions (Node.js)
+- **Storage**: Upstash Redis
 
 ## Data Storage
 
-All data is stored locally in your browser using localStorage. No data is sent to any server. The data structure includes:
+All data is stored in Upstash Redis with the following schema:
 
+- `players:all` → Set of player IDs
+- `players:{id}` → Player object (JSON)
+- `games:all` → Sorted set of game IDs (ordered by date)
+- `games:{id}` → Game object (JSON)
+
+**Data Structure:**
 - **Players**: ID, name, current rating, games played, wins, rating history
-- **Games**: ID, date, player placements, rating changes
+- **Games**: ID, date, player placements, rating changes, expansions, generations
 
 ## Mobile Responsive
 
@@ -173,8 +239,23 @@ This is a personal project, but feel free to fork and modify for your own use!
 
 ## Known Limitations
 
-- Data is stored locally (not synced across devices)
-- No multiplayer/collaborative editing
-- No game history editing or deletion (by design, to maintain rating integrity)
+- Requires internet connection (no offline mode)
+- Single-user system (no multi-user authentication)
+- Import functionality not yet implemented (export works)
+- Game deletion recalculates all ratings (can be slow with many games)
+
+## API Endpoints
+
+### Players
+- `GET /api/players` - Get all players
+- `POST /api/players` - Create new player
+- `GET /api/rankings?activeOnly=true` - Get rankings with optional filter
+- `GET /api/players/[id]/stats` - Get player statistics
+
+### Games
+- `GET /api/games` - Get all games
+- `POST /api/games` - Record new game
+- `DELETE /api/games/[id]` - Delete game and recalculate ratings
+- `DELETE /api/games/last` - Undo last game
 
 Enjoy tracking your board game rankings!

@@ -1,30 +1,80 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import type { PlayerStats as PlayerStatsType, HeadToHeadRecord, Player } from '../types';
-import { getPlayerStats, getAllHeadToHeads, getAllPlayers } from '../services/storageService';
+import type { Player, Game } from '../types';
+import { getPlayerStats } from '../services/apiService';
 
 interface PlayerStatsProps {
   playerId: string;
   onClose: () => void;
 }
 
+interface GameWithNames extends Game {
+  playerNames?: Record<string, string>;
+}
+
+interface StatsData {
+  player: Player;
+  winRate: number;
+  averagePlacement: number;
+  lastGameDate: number | null;
+  recentGames: GameWithNames[];
+  headToHead: Array<{
+    opponentId: string;
+    opponentName: string;
+    wins: number;
+    losses: number;
+    ties: number;
+    gamesPlayed: number;
+  }>;
+  playerNames: Record<string, string>;
+}
+
 export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
-  const [stats, setStats] = useState<PlayerStatsType | null>(null);
-  const [headToHeads, setHeadToHeads] = useState<HeadToHeadRecord[]>([]);
-  const [allPlayers, setAllPlayers] = useState<Record<string, Player>>({});
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const playerStats = getPlayerStats(playerId);
-    const h2h = getAllHeadToHeads(playerId);
-    const players = getAllPlayers();
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getPlayerStats(playerId);
+        setStats(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al cargar estadísticas');
+        console.error('Error loading player stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setStats(playerStats);
-    setHeadToHeads(h2h);
-    setAllPlayers(players);
+    loadStats();
   }, [playerId]);
 
-  if (!stats) {
-    return null;
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="tm-card p-8">
+          <div className="flex justify-center items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tm-copper"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="tm-card p-8">
+          <p className="text-red-600 dark:text-red-400 mb-4">{error || 'No se encontraron estadísticas'}</p>
+          <button onClick={onClose} className="tm-button-primary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const chartData = stats.player.ratingHistory.map((entry, index) => ({
@@ -138,7 +188,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           )}
 
           {/* Head-to-Head Records */}
-          {headToHeads.length > 0 && (
+          {stats.headToHead.length > 0 && (
             <div>
               <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
                 Récords Cara a Cara
@@ -168,8 +218,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-tm-copper/15 dark:divide-white/10">
-                    {headToHeads.map(record => {
-                      const opponent = allPlayers[record.opponentId];
+                    {stats.headToHead.map(record => {
                       const winPercentage = record.gamesPlayed > 0
                         ? (record.wins / record.gamesPlayed) * 100
                         : 0;
@@ -177,7 +226,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                       return (
                         <tr key={record.opponentId}>
                           <td className="px-4 py-3 text-sm font-semibold text-tm-oxide dark:text-tm-sand">
-                            {opponent?.name || 'Desconocido'}
+                            {record.opponentName}
                           </td>
                           <td className="px-4 py-3 text-sm text-center text-tm-oxide/70 dark:text-tm-sand/70">
                             {record.gamesPlayed}
@@ -243,7 +292,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                         </div>
                       </div>
                       <div className="text-xs text-tm-oxide/70 dark:text-tm-sand/70">
-                        Jugadores: {game.placements.map(id => allPlayers[id]?.name || 'Desconocido').join(', ')}
+                        Jugadores: {game.placements.map(id => stats.playerNames[id] || 'Desconocido').join(', ')}
                       </div>
                     </div>
                   );

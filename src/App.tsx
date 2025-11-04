@@ -9,7 +9,7 @@ import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
 import { useDarkMode } from './hooks/useDarkMode';
-import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/storageService';
+import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/apiService';
 import type { Player, Game } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -24,57 +24,88 @@ function App() {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadData = () => {
-    const allPlayers = getAllPlayers();
-    const rankedPlayers = getRankings(activeOnly);
-    const allGames = getAllGames();
-    setPlayers(allPlayers);
-    setRankings(rankedPlayers);
-    setGames(allGames);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [allPlayers, rankedPlayers, allGames] = await Promise.all([
+        getAllPlayers(),
+        getRankings(activeOnly),
+        getAllGames(),
+      ]);
+
+      const playersRecord: Record<string, Player> = {};
+      allPlayers.forEach(player => {
+        playersRecord[player.id] = player;
+      });
+
+      setPlayers(playersRecord);
+      setRankings(rankedPlayers);
+      setGames(allGames);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar datos');
+      console.error('Error loading data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, [activeOnly]);
 
-  const handleAddPlayer = (name: string) => {
+  const handleAddPlayer = async (name: string) => {
     if (!isAuthenticated) {
       setShowLoginModal(true);
       return;
     }
-    addPlayer(name);
-    loadData();
-  };
-
-  const handleRecordGame = (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
-    if (!isAuthenticated) {
-      setShowLoginModal(true);
-      return;
-    }
-    recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
-    loadData();
-  };
-
-  const handleUndoLastGame = () => {
-    if (!isAuthenticated) {
-      setShowLoginModal(true);
-      return;
-    }
-    const success = deleteLastGame();
-    if (success) {
-      loadData();
+    try {
+      await addPlayer(name);
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al agregar jugador');
     }
   };
 
-  const handleDeleteGame = (gameId: string) => {
+  const handleRecordGame = async (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
     if (!isAuthenticated) {
       setShowLoginModal(true);
       return;
     }
-    const success = deleteGameById(gameId);
-    if (success) {
-      loadData();
+    try {
+      await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al registrar partida');
+    }
+  };
+
+  const handleUndoLastGame = async () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    try {
+      await deleteLastGame();
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al deshacer última partida');
+    }
+  };
+
+  const handleDeleteGame = async (gameId: string) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    try {
+      await deleteGameById(gameId);
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al eliminar partida');
     }
   };
 
@@ -192,7 +223,27 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        {activeTab === 'rankings' && (
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tm-copper"></div>
+          </div>
+        )}
+
+        {error && (
+          <div className="tm-card p-6 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <p className="text-red-800 dark:text-red-200">
+              <strong>Error:</strong> {error}
+            </p>
+            <button
+              onClick={loadData}
+              className="mt-4 tm-button-primary"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && activeTab === 'rankings' && (
           <div className="space-y-6">
             <StatsOverview games={games} players={players} />
             <div className="flex justify-end">
@@ -215,11 +266,11 @@ function App() {
           </div>
         )}
 
-        {activeTab === 'addGame' && (
+        {!loading && !error && activeTab === 'addGame' && (
           <AddGame players={players} onSubmit={handleRecordGame} onUndo={handleUndoLastGame} />
         )}
 
-        {activeTab === 'players' && (
+        {!loading && !error && activeTab === 'players' && (
           <PlayerManagement
             players={players}
             onAddPlayer={handleAddPlayer}
@@ -227,11 +278,11 @@ function App() {
           />
         )}
 
-        {activeTab === 'history' && (
+        {!loading && !error && activeTab === 'history' && (
           <GameHistory games={games} players={players} onDeleteGame={handleDeleteGame} />
         )}
 
-        {activeTab === 'settings' && (
+        {!loading && !error && activeTab === 'settings' && (
           <div className="space-y-6">
             <ExportImport 
               onImportSuccess={handleImportSuccess}

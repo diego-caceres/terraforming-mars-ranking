@@ -69,3 +69,5 @@ dist-ssr
 *.sw?
 .env
 data/
+.vercel
+.env*.local
