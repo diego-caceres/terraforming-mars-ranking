@@ -3,6 +3,7 @@ import type { Player } from '../types';
 import { hasLowConfidence } from '../services/eloCalculator';
 import { getMonthlyRankings } from '../services/apiService';
 import { getColorClasses } from '../utils/colorUtils';
+import { getPodiumClasses } from '../utils/podiumUtils';
 
 interface RankingsProps {
   players: Player[];
@@ -22,7 +23,23 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
   const [monthlyLoading, setMonthlyLoading] = useState(false);
   const [monthlyGamesCount, setMonthlyGamesCount] = useState(0);
 
+  // State for last 3 months rankings
+  const [last3MonthsData, setLast3MonthsData] = useState<Array<{
+    year: number;
+    month: number;
+    rankings: Player[];
+    gamesCount: number;
+    loading: boolean;
+  }>>([]);
+
   const displayPlayers = viewMode === 'allTime' ? players : monthlyPlayers;
+
+  // Load last 3 months rankings on mount (only in allTime view)
+  useEffect(() => {
+    if (viewMode === 'allTime') {
+      loadLast3MonthsRankings();
+    }
+  }, [viewMode]);
 
   // Load monthly rankings when month/year changes
   useEffect(() => {
@@ -30,6 +47,79 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
       loadMonthlyRankings();
     }
   }, [viewMode, selectedYear, selectedMonth]);
+
+  const loadLast3MonthsRankings = async () => {
+    const now = new Date();
+    const months = [];
+
+    // Generate last 6 months
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        rankings: [],
+        gamesCount: 0,
+        loading: true,
+      });
+    }
+
+    setLast3MonthsData(months);
+
+    // Load data for first 3 months (most recent)
+    for (let i = 0; i < 3; i++) {
+      try {
+        const data = await getMonthlyRankings(months[i].year, months[i].month);
+        setLast3MonthsData(prev => {
+          const updated = [...prev];
+          updated[i] = {
+            ...updated[i],
+            rankings: data.rankings,
+            gamesCount: data.gamesCount,
+            loading: false,
+          };
+          return updated;
+        });
+      } catch (error) {
+        console.error(`Error loading rankings for ${months[i].year}-${months[i].month}:`, error);
+        setLast3MonthsData(prev => {
+          const updated = [...prev];
+          updated[i] = {
+            ...updated[i],
+            loading: false,
+          };
+          return updated;
+        });
+      }
+    }
+
+    // Load data for next 3 months (older) after first 3 are loaded
+    for (let i = 3; i < 6; i++) {
+      try {
+        const data = await getMonthlyRankings(months[i].year, months[i].month);
+        setLast3MonthsData(prev => {
+          const updated = [...prev];
+          updated[i] = {
+            ...updated[i],
+            rankings: data.rankings,
+            gamesCount: data.gamesCount,
+            loading: false,
+          };
+          return updated;
+        });
+      } catch (error) {
+        console.error(`Error loading rankings for ${months[i].year}-${months[i].month}:`, error);
+        setLast3MonthsData(prev => {
+          const updated = [...prev];
+          updated[i] = {
+            ...updated[i],
+            loading: false,
+          };
+          return updated;
+        });
+      }
+    }
+  };
 
   const loadMonthlyRankings = async () => {
     try {
@@ -74,6 +164,12 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
     if (change === null) return '';
     if (change > 0) return `+${change}`;
     return `${change}`;
+  };
+
+  const getMonthName = (month: number): string => {
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    return months[month - 1];
   };
 
   return (
@@ -241,8 +337,10 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                     onClick={() => onPlayerClick(player.id)}
                     className="cursor-pointer transition-colors hover:bg-tm-copper/10 dark:hover:bg-white/5"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-tm-oxide dark:text-tm-sand">
-                      #{index + 1}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white ${getPodiumClasses(index + 1)}`}>
+                        {index + 1}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -291,6 +389,132 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Last 6 Months Rankings - Only show in allTime view */}
+      {viewMode === 'allTime' && last3MonthsData.length > 0 && (
+        <div className="border-t border-tm-copper/20 dark:border-white/10 pt-6 px-6 pb-6">
+          <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow mb-4">
+            Rankings Mensuales
+          </h3>
+          <div className="space-y-4">
+            {/* First 3 months */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {last3MonthsData.slice(0, 3).map((monthData, idx) => (
+                <div key={idx} className="rounded-lg border border-tm-copper/30 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-tm-haze/40">
+                  <div className="bg-tm-copper/10 dark:bg-white/5 px-4 py-3 border-b border-tm-copper/20 dark:border-white/10">
+                    <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-sand">
+                      {getMonthName(monthData.month)} {monthData.year}
+                    </h4>
+                    <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
+                      {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
+                    </p>
+                  </div>
+                  {monthData.loading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tm-copper"></div>
+                    </div>
+                  ) : monthData.rankings.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                      Sin partidas este mes
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-tm-copper/10 dark:divide-white/5">
+                      {monthData.rankings.slice(0, 5).map((player, playerIdx) => (
+                        <div
+                          key={player.id}
+                          onClick={() => onPlayerClick(player.id)}
+                          className="px-4 py-3 flex items-center gap-3 hover:bg-tm-copper/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                        >
+                          <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${getPodiumClasses(playerIdx + 1)}`}>
+                            {playerIdx + 1}
+                          </div>
+                          {player.color && (
+                            <div
+                              className={`w-2.5 h-2.5 rounded-full border-2 ${getColorClasses(player.color)}`}
+                              title={player.color}
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-tm-oxide dark:text-tm-sand truncate">
+                              {player.name}
+                            </div>
+                          </div>
+                          <div className="text-sm font-bold text-tm-oxide dark:text-tm-glow">
+                            {Math.round(player.currentRating)}
+                          </div>
+                        </div>
+                      ))}
+                      {monthData.rankings.length > 5 && (
+                        <div className="px-4 py-2 text-center text-xs text-tm-oxide/50 dark:text-tm-sand/50">
+                          +{monthData.rankings.length - 5} más
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Next 3 months */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {last3MonthsData.slice(3, 6).map((monthData, idx) => (
+              <div key={idx} className="rounded-lg border border-tm-copper/30 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-tm-haze/40">
+                <div className="bg-tm-copper/10 dark:bg-white/5 px-4 py-3 border-b border-tm-copper/20 dark:border-white/10">
+                  <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-sand">
+                    {getMonthName(monthData.month)} {monthData.year}
+                  </h4>
+                  <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
+                    {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
+                  </p>
+                </div>
+                {monthData.loading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tm-copper"></div>
+                  </div>
+                ) : monthData.rankings.length === 0 ? (
+                  <div className="px-4 py-8 text-center text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                    Sin partidas este mes
+                  </div>
+                ) : (
+                  <div className="divide-y divide-tm-copper/10 dark:divide-white/5">
+                    {monthData.rankings.slice(0, 5).map((player, playerIdx) => (
+                      <div
+                        key={player.id}
+                        onClick={() => onPlayerClick(player.id)}
+                        className="px-4 py-3 flex items-center gap-3 hover:bg-tm-copper/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                      >
+                        <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${getPodiumClasses(playerIdx + 1)}`}>
+                          {playerIdx + 1}
+                        </div>
+                        {player.color && (
+                          <div
+                            className={`w-2.5 h-2.5 rounded-full border-2 ${getColorClasses(player.color)}`}
+                            title={player.color}
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-tm-oxide dark:text-tm-sand truncate">
+                            {player.name}
+                          </div>
+                        </div>
+                        <div className="text-sm font-bold text-tm-oxide dark:text-tm-glow">
+                          {Math.round(player.currentRating)}
+                        </div>
+                      </div>
+                    ))}
+                    {monthData.rankings.length > 5 && (
+                      <div className="px-4 py-2 text-center text-xs text-tm-oxide/50 dark:text-tm-sand/50">
+                        +{monthData.rankings.length - 5} más
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
         </div>
       )}
     </div>

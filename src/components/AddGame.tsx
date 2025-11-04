@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { Player, Game } from '../types';
 import { getColorClasses } from '../utils/colorUtils';
+import { getPodiumClasses } from '../utils/podiumUtils';
 
 interface AddGameProps {
   players: Record<string, Player>;
@@ -327,7 +328,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                                   : 'bg-white/90 dark:bg-tm-haze/90'
                               }`}
                             >
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-tm-copper to-tm-copper-dark text-sm font-bold text-white shadow">
+                              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white shadow ${getPodiumClasses(index + 1)}`}>
                                 {index + 1}
                               </div>
                               {player?.color && (
