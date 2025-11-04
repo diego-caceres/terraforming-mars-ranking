@@ -43,12 +43,6 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
     return player.currentRating > (max?.currentRating || 0) ? player : max;
   }, null as Player | null);
 
-  const antoPlayer = Object.values(players).find(
-    (player) => player.name.trim().toLowerCase() === 'anto'
-  );
-  const antoGames = antoPlayer ? games.filter((game) => game.placements.includes(antoPlayer.id)) : [];
-  const antoGamesCount = antoGames.length;
-  const antoLastGameDate = antoGamesCount > 0 ? new Date(antoGames[0].date) : null;
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">

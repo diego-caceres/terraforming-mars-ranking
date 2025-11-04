@@ -12,13 +12,13 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!isAuthenticated) {
       onAuthenticationRequired();
       return;
     }
     try {
-      const data = exportData();
+      const data = await exportData();
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

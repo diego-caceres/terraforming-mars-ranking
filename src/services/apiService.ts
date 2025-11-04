@@ -96,6 +96,7 @@ export async function getPlayerStats(playerId: string): Promise<{
     ties: number;
     gamesPlayed: number;
   }>;
+  playerNames: Record<string, string>;
 }> {
   return apiCall(`/players/${playerId}/stats`);
 }
@@ -121,7 +122,7 @@ export async function exportData(): Promise<string> {
   return JSON.stringify(data, null, 2);
 }
 
-export async function importData(jsonString: string): Promise<void> {
+export async function importData(_jsonString: string): Promise<void> {
   // Note: Import functionality would need a dedicated API endpoint
   // For now, this is a placeholder
   throw new Error('Import functionality not yet implemented. Please contact administrator.');
