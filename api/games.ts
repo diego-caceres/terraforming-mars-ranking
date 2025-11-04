@@ -38,8 +38,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         players[playerId] = player;
       }
 
-      // Calculate Elo changes
-      const ratingChanges = calculateEloChanges(placements, players);
+      // Check if this is a 2-player game
+      const isTwoPlayerGame = placements.length === 2;
+
+      // Calculate Elo changes (will be zero for 2-player games)
+      const ratingChanges = isTwoPlayerGame
+        ? Object.fromEntries(placements.map(id => [id, 0]))
+        : calculateEloChanges(placements, players);
 
       // Create game object
       const newGame: Game = {
@@ -49,9 +54,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ratingChanges,
         expansions,
         generations,
+        twoPlayerGame: isTwoPlayerGame,
       };
 
-      // Apply rating changes to players
+      // Apply rating changes to players (skips for 2-player games)
       const updatedPlayers = applyRatingChanges(players, newGame);
 
       // Save game (using sorted set for date ordering)

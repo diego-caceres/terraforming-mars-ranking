@@ -25,6 +25,7 @@ export interface Game {
   ratingChanges: Record<string, number>;
   expansions?: string[];
   generations?: number;
+  twoPlayerGame?: boolean;
 }
 
 export interface GameResult {

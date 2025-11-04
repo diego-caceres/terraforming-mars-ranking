@@ -68,6 +68,7 @@ export function calculateEloChanges(
 
 /**
  * Apply rating changes to players and update their stats
+ * For 2-player games, only track activity (games played, wins) but don't change rating
  */
 export function applyRatingChanges(
   players: Record<string, Player>,

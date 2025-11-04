@@ -292,6 +292,13 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
             <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mb-3">
               Arriba = 1er lugar, Abajo = Último lugar
             </p>
+            {placements.length === 2 && (
+              <div className="mb-3 rounded-lg border border-tm-copper/30 bg-tm-copper/10 px-3 py-2 dark:bg-tm-copper/20">
+                <p className="text-xs text-tm-oxide dark:text-tm-sand">
+                  <strong>Nota:</strong> Las partidas de 2 jugadores se registran para tracking de actividad pero no afectan el rating ELO.
+                </p>
+              </div>
+            )}
 
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="placements">
@@ -342,7 +349,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                                 onClick={() => handleRemovePlayer(playerId)}
                                 className="text-xs font-semibold uppercase tracking-wide text-tm-copper-dark hover:text-tm-copper"
                               >
-                                Remove
+                                Borrar
                               </button>
                             </div>
                           )}

@@ -298,10 +298,15 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                       className="rounded-lg border border-tm-copper/20 bg-white/85 p-4 dark:border-white/10 dark:bg-tm-haze/80"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div>
+                        <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                             Posición #{placement + 1} de {game.placements.length}
                           </span>
+                          {game.twoPlayerGame && (
+                            <span className="text-[0.6rem] rounded-full border border-tm-copper/40 bg-tm-copper/15 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-tm-copper-dark dark:bg-tm-copper/25 dark:text-tm-glow">
+                              Sin ELO
+                            </span>
+                          )}
                         </div>
                         <div className="text-right">
                           <span
@@ -313,7 +318,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                                 : 'text-tm-oxide/60 dark:text-tm-sand/60'
                             }`}
                           >
-                            {ratingChange > 0 ? '+' : ''}{ratingChange}
+                            {game.twoPlayerGame ? '±0' : `${ratingChange > 0 ? '+' : ''}${ratingChange}`}
                           </span>
                           <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                             {formatDate(game.date)}

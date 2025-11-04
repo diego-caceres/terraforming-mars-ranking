@@ -87,6 +87,11 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                         <span className="tm-chip">
                           {game.placements.length} {game.placements.length === 1 ? 'jugador' : 'jugadores'}
                         </span>
+                        {game.twoPlayerGame && (
+                          <span className="rounded-full border border-tm-copper/40 bg-tm-copper/15 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-tm-copper-dark dark:bg-tm-copper/25 dark:text-tm-glow">
+                            Sin ELO
+                          </span>
+                        )}
                         {game.generations && (
                           <span className="tm-chip">
                             {game.generations} gen

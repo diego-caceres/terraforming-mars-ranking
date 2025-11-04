@@ -25,6 +25,7 @@ export interface Game {
   ratingChanges: Record<string, number>; // playerId -> rating change
   expansions?: string[]; // Optional: expansions used in the game
   generations?: number; // Optional: number of generations played (1-16)
+  twoPlayerGame?: boolean; // True if this is a 2-player game (doesn't affect ELO)
 }
 
 export interface GameResult {
