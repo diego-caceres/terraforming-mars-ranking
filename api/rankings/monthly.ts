@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv, KEYS } from '../_lib/kv';
 import { calculateEloChanges, applyRatingChanges, getStartingRating } from '../_lib/eloCalculator';
-import type { Player, Game } from '../_lib/types';
+import type { Player, Game, RatingHistoryEntry } from '../_lib/types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -22,6 +22,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Año o mes inválido' });
     }
 
+    // Calculate month boundaries in UTC to avoid timezone issues
+    const monthStart = Date.UTC(yearNum, monthNum - 1, 1, 0, 0, 0, 0);
+    const monthEnd = Date.UTC(yearNum, monthNum, 1, 0, 0, 0, 0);
+
     // Get all games
     const gameIds = (await kv.zrange(KEYS.GAMES_ALL, 0, -1) as string[]) || [];
     const allGames: Game[] = [];
@@ -33,11 +37,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Filter games for the specified month
-    const monthlyGames = allGames.filter(game => {
-      const gameDate = new Date(game.date);
-      return gameDate.getFullYear() === yearNum && gameDate.getMonth() === monthNum - 1;
-    });
+    // Filter games for the specified month (inclusive of month start, exclusive of next month)
+    const monthlyGames = allGames.filter(game => game.date >= monthStart && game.date < monthEnd);
 
     if (monthlyGames.length === 0) {
       return res.status(200).json({ rankings: [], year: yearNum, month: monthNum, gamesCount: 0 });
@@ -52,14 +53,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       game.placements.forEach(playerId => playerIdsSet.add(playerId));
     });
 
-    // Initialize players with starting rating
+    // Initialize players with rating at the start of the month
     const players: Record<string, Player> = {};
     for (const playerId of playerIdsSet) {
       const playerData = await kv.get<Player>(KEYS.PLAYER(playerId));
       if (playerData) {
+        const sortedHistory = [...playerData.ratingHistory].sort((a, b) => a.date - b.date);
+        let lastBeforeMonth: RatingHistoryEntry | undefined;
+        let firstInMonth: RatingHistoryEntry | undefined;
+
+        for (const entry of sortedHistory) {
+          if (entry.date < monthStart) {
+            lastBeforeMonth = entry;
+            continue;
+          }
+
+          if (entry.date >= monthStart && entry.date < monthEnd) {
+            firstInMonth = entry;
+            break;
+          }
+
+          if (entry.date >= monthEnd) {
+            break;
+          }
+        }
+
+        let startingRating = getStartingRating();
+        if (lastBeforeMonth) {
+          startingRating = lastBeforeMonth.rating;
+        } else if (firstInMonth) {
+          startingRating = firstInMonth.rating - firstInMonth.change;
+        }
+
         players[playerId] = {
           ...playerData,
-          currentRating: getStartingRating(),
+          currentRating: startingRating,
           gamesPlayed: 0,
           wins: 0,
           ratingHistory: [],
@@ -69,7 +97,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Recalculate ELO for the month
     for (const game of monthlyGames) {
-      const ratingChanges = calculateEloChanges(game.placements, players);
+      const ratingChanges =
+        game.ratingChanges && Object.keys(game.ratingChanges).length > 0
+          ? game.ratingChanges
+          : calculateEloChanges(game.placements, players);
       const gameWithChanges = { ...game, ratingChanges };
       const updatedPlayers = applyRatingChanges(players, gameWithChanges);
       Object.assign(players, updatedPlayers);
