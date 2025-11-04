@@ -107,7 +107,7 @@ function App() {
             <div>
               <p className="tm-card-subtitle text-white/70">Liga Los del Cuadrito</p>
               <h1 className="text-3xl md:text-4xl font-heading tracking-[0.4em] uppercase">
-              Rankings de Terraforming Mars
+              Terraforming Mars
             </h1>
             </div>
             <div className="flex items-center gap-3">

@@ -208,27 +208,15 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
             <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Espectadora Premium
             </p>
-            {antoPlayer ? (
-              <div className="mt-3 space-y-1">
-                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                  {antoPlayer.name}
-                </p>
-                <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                  {antoGamesCount > 0 && antoLastGameDate
-                    ? `Última partida: ${formatDate(antoLastGameDate)}`
-                    : 'Animando desde las gradas'}
-                </p>
-                {antoGamesCount > 0 && (
-                  <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                    Partidas registradas: {antoGamesCount}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="mt-3 text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
-                Anto aún no aparece en el ranking
+            <div className="mt-3 space-y-1">
+              <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
+                Anto
               </p>
-            )}
+              <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                Animando desde las gradas
+              </p>
+              
+            </div>
           </div>
           <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/15 text-tm-copper">
             <svg
