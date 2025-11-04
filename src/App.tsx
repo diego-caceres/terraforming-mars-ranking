@@ -24,6 +24,7 @@ function App() {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
@@ -187,17 +188,22 @@ function App() {
     setActiveOnly(!activeOnly);
   };
 
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80 backdrop-blur-xl">
       {/* Header */}
       <header className="bg-gradient-to-r from-tm-copper via-tm-copper-dark to-tm-oxide text-white shadow-lg border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-5">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-3 sm:py-4 md:py-5">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4">
             <div>
               <p className="tm-card-subtitle text-white/70">Liga Los del Cuadrito</p>
-              <h1 className="text-3xl md:text-4xl font-heading tracking-[0.4em] uppercase">
-              Terraforming Mars
-            </h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading tracking-[0.3em] md:tracking-[0.4em] uppercase">
+                Terraforming Mars
+              </h1>
             </div>
             <div className="flex items-center gap-3">
               {isAuthenticated ? (
@@ -224,10 +230,43 @@ function App() {
       {/* Navigation */}
       <nav className="border-b border-tm-copper/30 bg-white/85 dark:bg-tm-haze/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex justify-end py-3 md:hidden">
             <button
-              onClick={() => setActiveTab('rankings')}
-              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="main-navigation"
+              className="inline-flex items-center gap-2 rounded-md border border-tm-copper/30 bg-white/60 px-3 py-2 text-xs font-heading uppercase tracking-[0.25em] text-tm-oxide/80 transition hover:bg-white/80 dark:border-white/20 dark:bg-tm-haze/70 dark:text-tm-sand/70 dark:hover:bg-tm-haze"
+            >
+              <span>Menú</span>
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {isMobileMenuOpen ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <g>
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </g>
+                )}
+              </svg>
+            </button>
+          </div>
+          <div
+            id="main-navigation"
+            className={`${isMobileMenuOpen ? 'flex' : 'hidden'} flex-col gap-2 pb-3 md:flex md:flex-row md:items-center md:gap-4 md:pb-0`}
+          >
+            <button
+              onClick={() => handleTabChange('rankings')}
+              className={`relative w-full md:w-auto px-3 py-3 text-left md:text-center text-xs sm:text-sm font-heading uppercase tracking-[0.25em] md:tracking-[0.35em] transition-all ${
                 activeTab === 'rankings'
                   ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
@@ -236,8 +275,8 @@ function App() {
               Rankings
             </button>
             <button
-              onClick={() => setActiveTab('addGame')}
-              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
+              onClick={() => handleTabChange('addGame')}
+              className={`relative w-full md:w-auto px-3 py-3 text-left md:text-center text-xs sm:text-sm font-heading uppercase tracking-[0.25em] md:tracking-[0.35em] transition-all ${
                 activeTab === 'addGame'
                   ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
@@ -246,8 +285,8 @@ function App() {
               Registrar partida
             </button>
             <button
-              onClick={() => setActiveTab('players')}
-              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
+              onClick={() => handleTabChange('players')}
+              className={`relative w-full md:w-auto px-3 py-3 text-left md:text-center text-xs sm:text-sm font-heading uppercase tracking-[0.25em] md:tracking-[0.35em] transition-all ${
                 activeTab === 'players'
                   ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
@@ -256,8 +295,8 @@ function App() {
               Jugadores
             </button>
             <button
-              onClick={() => setActiveTab('history')}
-              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
+              onClick={() => handleTabChange('history')}
+              className={`relative w-full md:w-auto px-3 py-3 text-left md:text-center text-xs sm:text-sm font-heading uppercase tracking-[0.25em] md:tracking-[0.35em] transition-all ${
                 activeTab === 'history'
                   ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
@@ -266,8 +305,8 @@ function App() {
               Historial
             </button>
             <button
-              onClick={() => setActiveTab('settings')}
-              className={`relative px-4 py-4 text-xs sm:text-sm font-heading uppercase tracking-[0.35em] transition-all ${
+              onClick={() => handleTabChange('settings')}
+              className={`relative w-full md:w-auto px-3 py-3 text-left md:text-center text-xs sm:text-sm font-heading uppercase tracking-[0.25em] md:tracking-[0.35em] transition-all ${
                 activeTab === 'settings'
                   ? 'border-b-3 border-tm-copper text-tm-copper dark:text-tm-glow'
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
