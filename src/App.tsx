@@ -272,7 +272,7 @@ function App() {
               <strong>Error:</strong> {error}
             </p>
             <button
-              onClick={loadData}
+              onClick={() => loadData()}
               className="mt-4 tm-button-primary"
             >
               Reintentar
