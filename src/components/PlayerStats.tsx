@@ -115,16 +115,22 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
         <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5">
           <div>
             <p className="tm-card-subtitle">Expediente de Piloto</p>
-            <div className="flex items-center gap-2">
-              {stats.player.color && (
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${getColorClasses(stats.player.color)}`}
-                  title={stats.player.color}
-                />
-              )}
+            <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-2xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
                 {stats.player.name}
               </h2>
+              {stats.player.color && (
+                <span
+                  className="inline-flex items-center gap-2 rounded-full border border-tm-copper/30 bg-white/80 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-tm-oxide dark:border-white/20 dark:bg-tm-haze/70 dark:text-tm-sand"
+                  title={`Color: ${stats.player.color}`}
+                >
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(stats.player.color)}`}
+                    aria-hidden="true"
+                  />
+                  {stats.player.color}
+                </span>
+              )}
             </div>
             <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
               Miembro desde {formatDate(getMemberSinceDate())}

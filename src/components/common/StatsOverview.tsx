@@ -1,4 +1,5 @@
 import type { Game, Player } from '../../types';
+import { getColorClasses } from '../../utils/colorUtils';
 
 interface StatsOverviewProps {
   games: Game[];
@@ -84,9 +85,23 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
             </p>
             {lastGame ? (
               <div className="mt-3">
-                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                  {lastGameWinner?.name || 'Desconocido'}
-                </p>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
+                    {lastGameWinner?.name || 'Desconocido'}
+                  </p>
+                  {lastGameWinner?.color && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full"
+                      title={`Color: ${lastGameWinner.color}`}
+                    >
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(lastGameWinner.color)}`}
+                        aria-hidden="true"
+                      />
+                      
+                    </span>
+                  )}
+                </div>
                 <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                   {lastGameDate && formatDate(lastGameDate)}
                 </p>
@@ -124,9 +139,23 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
             </p>
             {topPlayer ? (
               <div className="mt-3">
-                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                  {topPlayer.name}
-                </p>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
+                    {topPlayer.name}
+                  </p>
+                  {topPlayer.color && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full"
+                      title={`Color: ${topPlayer.color}`}
+                    >
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(topPlayer.color)}`}
+                        aria-hidden="true"
+                      />
+                     
+                    </span>
+                  )}
+                </div>
                 <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                   {Math.round(topPlayer.currentRating)} puntos
                 </p>
@@ -164,9 +193,22 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
             </p>
             {mostActivePlayer ? (
               <div className="mt-3">
-                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                  {mostActivePlayer.name}
-                </p>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
+                    {mostActivePlayer.name}
+                  </p>
+                  {mostActivePlayer.color && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full"
+                      title={`Color: ${mostActivePlayer.color}`}
+                    >
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(mostActivePlayer.color)}`}
+                        aria-hidden="true"
+                      />
+                    </span>
+                  )}
+                </div>
                 <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                   {mostActivePlayer.gamesPlayed} {mostActivePlayer.gamesPlayed === 1 ? 'partida' : 'partidas'}
                 </p>
