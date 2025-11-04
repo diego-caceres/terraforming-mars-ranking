@@ -1,4 +1,5 @@
 - Agregar rankings mensuales de ELO
+- Agregar que los jugadores tengan un Color asignado
 - Agregar que las partidas de dos jugadores no cambien el ELO, pero cuente la presentalidad
 - Subir imagenes como highlights
 
