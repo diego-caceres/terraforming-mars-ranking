@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import type { Player } from '../types';
+import type { Player, PlayerColor } from '../types';
+import PlayerEdit from './PlayerEdit';
+import { getColorClasses } from '../utils/colorUtils';
 
 interface PlayerManagementProps {
   players: Record<string, Player>;
-  onAddPlayer: (name: string) => void;
+  onAddPlayer: (name: string, color?: PlayerColor) => void;
   onPlayerClick: (playerId: string) => void;
+  onUpdatePlayer: (playerId: string, updates: { name?: string; color?: PlayerColor }) => Promise<void>;
 }
 
-export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }: PlayerManagementProps) {
+export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, onUpdatePlayer }: PlayerManagementProps) {
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -93,30 +97,57 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick }
             {playerArray.map(player => (
               <div
                 key={player.id}
-                onClick={() => onPlayerClick(player.id)}
-                className="flex items-center justify-between rounded-lg border border-tm-copper/30 bg-white/80 px-4 py-3 transition-colors hover:bg-white dark:border-white/10 dark:bg-tm-haze/80 dark:hover:bg-tm-haze/70 cursor-pointer"
+                className="flex items-center justify-between rounded-lg border border-tm-copper/30 bg-white/80 px-4 py-3 transition-colors hover:bg-white dark:border-white/10 dark:bg-tm-haze/80 dark:hover:bg-tm-haze/70"
               >
-                <div>
-                  <div className="font-semibold text-tm-oxide dark:text-tm-sand">
-                    {player.name}
-                  </div>
-                  <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 uppercase tracking-wide">
-                    {player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida jugada' : 'partidas jugadas'}
+                <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={() => onPlayerClick(player.id)}>
+                  {player.color && (
+                    <div
+                      className={`w-3 h-3 rounded-full border-2 ${getColorClasses(player.color)}`}
+                      title={player.color}
+                    />
+                  )}
+                  <div>
+                    <div className="font-semibold text-tm-oxide dark:text-tm-sand">
+                      {player.name}
+                    </div>
+                    <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 uppercase tracking-wide">
+                      {player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida jugada' : 'partidas jugadas'}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold text-tm-oxide dark:text-tm-glow">
-                    {Math.round(player.currentRating)}
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-tm-oxide dark:text-tm-glow">
+                      {Math.round(player.currentRating)}
+                    </div>
+                    <div className="text-[0.65rem] uppercase tracking-[0.2em] text-tm-oxide/60 dark:text-tm-sand/60">
+                      Rating
+                    </div>
                   </div>
-                  <div className="text-[0.65rem] uppercase tracking-[0.2em] text-tm-oxide/60 dark:text-tm-sand/60">
-                    Rating
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingPlayer(player);
+                    }}
+                    className="rounded-md border border-tm-copper/40 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-tm-oxide transition-all hover:bg-white hover:border-tm-copper dark:bg-tm-haze/80 dark:text-tm-sand dark:hover:bg-tm-haze/70"
+                  >
+                    Editar
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Edit Player Modal */}
+      {editingPlayer && (
+        <PlayerEdit
+          player={editingPlayer}
+          onSave={onUpdatePlayer}
+          onClose={() => setEditingPlayer(null)}
+        />
+      )}
     </div>
   );
 }

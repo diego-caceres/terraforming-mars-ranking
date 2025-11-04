@@ -1,3 +1,5 @@
+export type PlayerColor = 'Yellow' | 'Red' | 'Green' | 'Purple' | 'Blue' | 'Pink' | 'Orange';
+
 export interface Player {
   id: string;
   name: string;
@@ -6,6 +8,7 @@ export interface Player {
   wins: number;
   createdAt: number;
   ratingHistory: RatingHistoryEntry[];
+  color?: PlayerColor;
 }
 
 export interface RatingHistoryEntry {

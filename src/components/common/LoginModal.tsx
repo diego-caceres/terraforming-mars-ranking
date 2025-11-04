@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { authenticate, isValidPassword } from '../../services/authService';
 
 interface LoginModalProps {
@@ -10,6 +10,13 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isOpen && passwordInputRef.current) {
+            passwordInputRef.current.focus();
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -67,6 +74,7 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
                         <input
                             type="password"
                             id="password"
+                            ref={passwordInputRef}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="mt-2 block w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"

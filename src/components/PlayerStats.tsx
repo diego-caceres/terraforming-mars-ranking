@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Player, Game } from '../types';
 import { getPlayerStats } from '../services/apiService';
+import { getColorClasses } from '../utils/colorUtils';
 
 interface PlayerStatsProps {
   playerId: string;
@@ -96,6 +97,17 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
     return new Date(timestamp).toLocaleDateString();
   };
 
+  // Get the earliest date between createdAt and first game
+  const getMemberSinceDate = () => {
+    const createdAt = stats.player.createdAt;
+    const firstGameDate = stats.player.ratingHistory.length > 0
+      ? stats.player.ratingHistory[0].date
+      : null;
+
+    if (!firstGameDate) return createdAt;
+    return Math.min(createdAt, firstGameDate);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <div className="tm-card relative w-full max-h-[90vh] max-w-4xl overflow-y-auto">
@@ -103,11 +115,19 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
         <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5">
           <div>
             <p className="tm-card-subtitle">Expediente de Piloto</p>
-            <h2 className="text-2xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
-              {stats.player.name}
-            </h2>
+            <div className="flex items-center gap-2">
+              {stats.player.color && (
+                <div
+                  className={`w-4 h-4 rounded-full border-2 ${getColorClasses(stats.player.color)}`}
+                  title={stats.player.color}
+                />
+              )}
+              <h2 className="text-2xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
+                {stats.player.name}
+              </h2>
+            </div>
             <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-              Miembro desde {formatDate(stats.player.createdAt)}
+              Miembro desde {formatDate(getMemberSinceDate())}
             </p>
           </div>
           <button

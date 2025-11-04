@@ -9,8 +9,8 @@ import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
 import { useDarkMode } from './hooks/useDarkMode';
-import { getRankings, getAllPlayers, addPlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/apiService';
-import type { Player, Game } from './types';
+import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/apiService';
+import type { Player, Game, PlayerColor } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
 
@@ -62,11 +62,11 @@ function App() {
     loadData();
   }, [activeOnly]);
 
-  const handleAddPlayer = async (name: string) => {
+  const handleAddPlayer = async (name: string, color?: PlayerColor) => {
     if (!isAuthenticated) {
       setPendingAction(() => async () => {
         try {
-          await addPlayer(name);
+          await addPlayer(name, color);
           await loadData();
         } catch (err) {
           alert(err instanceof Error ? err.message : 'Error al agregar jugador');
@@ -76,10 +76,31 @@ function App() {
       return;
     }
     try {
-      await addPlayer(name);
+      await addPlayer(name, color);
       await loadData();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al agregar jugador');
+    }
+  };
+
+  const handleUpdatePlayer = async (playerId: string, updates: { name?: string; color?: PlayerColor }) => {
+    if (!isAuthenticated) {
+      setPendingAction(() => async () => {
+        try {
+          await updatePlayer(playerId, updates);
+          await loadData();
+        } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error al actualizar jugador');
+        }
+      });
+      setShowLoginModal(true);
+      return;
+    }
+    try {
+      await updatePlayer(playerId, updates);
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al actualizar jugador');
     }
   };
 
@@ -301,6 +322,7 @@ function App() {
             players={players}
             onAddPlayer={handleAddPlayer}
             onPlayerClick={handlePlayerClick}
+            onUpdatePlayer={handleUpdatePlayer}
           />
         )}
 

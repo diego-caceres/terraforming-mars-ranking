@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { Player, Game } from '../types';
+import { getColorClasses } from '../utils/colorUtils';
 
 interface AddGameProps {
   players: Record<string, Player>;
@@ -267,8 +268,14 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                   key={player.id}
                   type="button"
                   onClick={() => handleAddPlayer(player.id)}
-                  className="rounded-md border border-tm-copper/40 bg-white/75 px-4 py-2 text-tm-oxide transition-all hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
+                  className="rounded-md border border-tm-copper/40 bg-white/75 px-4 py-2 text-tm-oxide transition-all hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60 flex items-center gap-2"
                 >
+                  {player.color && (
+                    <div
+                      className={`w-3 h-3 rounded-full border-2 ${getColorClasses(player.color)}`}
+                      title={player.color}
+                    />
+                  )}
                   {player.name}
                 </button>
               ))}
@@ -316,6 +323,12 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-tm-copper to-tm-copper-dark text-sm font-bold text-white shadow">
                                 {index + 1}
                               </div>
+                              {player?.color && (
+                                <div
+                                  className={`w-5 h-5 rounded-full border-2 ${getColorClasses(player.color)} shadow-sm`}
+                                  title={player.color}
+                                />
+                              )}
                               <div className="flex-1">
                                 <div className="font-semibold text-tm-oxide dark:text-tm-sand">
                                   {player?.name}

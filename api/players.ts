@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'POST') {
       // Create new player
-      const { name } = req.body;
+      const { name, color } = req.body;
 
       if (!name || typeof name !== 'string' || name.trim().length === 0) {
         return res.status(400).json({ error: 'El nombre del jugador es requerido' });
@@ -45,6 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         wins: 0,
         createdAt: Date.now(),
         ratingHistory: [],
+        color: color || undefined,
       };
 
       // Save player

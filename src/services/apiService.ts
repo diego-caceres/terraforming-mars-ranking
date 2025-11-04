@@ -29,10 +29,18 @@ export async function getAllPlayers(): Promise<Player[]> {
   return data.players;
 }
 
-export async function addPlayer(name: string): Promise<Player> {
+export async function addPlayer(name: string, color?: string): Promise<Player> {
   const data = await apiCall<{ player: Player }>('/players', {
     method: 'POST',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, color }),
+  });
+  return data.player;
+}
+
+export async function updatePlayer(playerId: string, updates: { name?: string; color?: string }): Promise<Player> {
+  const data = await apiCall<{ player: Player }>(`/players/${playerId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updates),
   });
   return data.player;
 }

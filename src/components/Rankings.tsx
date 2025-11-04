@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Player } from '../types';
 import { hasLowConfidence } from '../services/eloCalculator';
 import { getMonthlyRankings } from '../services/apiService';
+import { getColorClasses } from '../utils/colorUtils';
 
 interface RankingsProps {
   players: Player[];
@@ -245,6 +246,12 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
+                        {player.color && (
+                          <div
+                            className={`w-3 h-3 rounded-full border-2 ${getColorClasses(player.color)}`}
+                            title={player.color}
+                          />
+                        )}
                         <span className="text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                           {player.name}
                         </span>
