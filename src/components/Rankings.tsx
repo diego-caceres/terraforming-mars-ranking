@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Player } from '../types';
 import { hasLowConfidence } from '../services/eloCalculator';
+import { getMonthlyRankings } from '../services/apiService';
 
 interface RankingsProps {
   players: Player[];
@@ -8,10 +9,42 @@ interface RankingsProps {
   onPlayerClick: (playerId: string) => void;
 }
 
+type ViewMode = 'allTime' | 'monthly';
+
 export default function Rankings({ players, activeOnly, onPlayerClick }: RankingsProps) {
   const [sortBy, setSortBy] = useState<'rating' | 'games' | 'winRate'>('rating');
+  const [viewMode, setViewMode] = useState<ViewMode>('allTime');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [monthlyPlayers, setMonthlyPlayers] = useState<Player[]>([]);
+  const [monthlyLoading, setMonthlyLoading] = useState(false);
+  const [monthlyGamesCount, setMonthlyGamesCount] = useState(0);
 
-  const sortedPlayers = [...players].sort((a, b) => {
+  const displayPlayers = viewMode === 'allTime' ? players : monthlyPlayers;
+
+  // Load monthly rankings when month/year changes
+  useEffect(() => {
+    if (viewMode === 'monthly') {
+      loadMonthlyRankings();
+    }
+  }, [viewMode, selectedYear, selectedMonth]);
+
+  const loadMonthlyRankings = async () => {
+    try {
+      setMonthlyLoading(true);
+      const data = await getMonthlyRankings(selectedYear, selectedMonth);
+      setMonthlyPlayers(data.rankings);
+      setMonthlyGamesCount(data.gamesCount);
+    } catch (error) {
+      console.error('Error loading monthly rankings:', error);
+      setMonthlyPlayers([]);
+      setMonthlyGamesCount(0);
+    } finally {
+      setMonthlyLoading(false);
+    }
+  };
+
+  const sortedPlayers = [...displayPlayers].sort((a, b) => {
     switch (sortBy) {
       case 'rating':
         return b.currentRating - a.currentRating;
@@ -87,9 +120,78 @@ export default function Rankings({ players, activeOnly, onPlayerClick }: Ranking
             Por % Victorias
           </button>
         </div>
+
+        {/* View Mode and Month Selector */}
+        <div className="mt-4 border-t border-tm-copper/20 pt-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* View Mode Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode('allTime')}
+                className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
+                  viewMode === 'allTime'
+                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                    : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
+                }`}
+              >
+                Histórico
+              </button>
+              <button
+                onClick={() => setViewMode('monthly')}
+                className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
+                  viewMode === 'monthly'
+                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                    : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
+                }`}
+              >
+                Mensual
+              </button>
+            </div>
+
+            {/* Month/Year Selector (only show in monthly mode) */}
+            {viewMode === 'monthly' && (
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                  className="rounded-md border border-tm-copper/40 bg-white/90 px-3 py-1.5 text-sm text-tm-oxide dark:bg-tm-haze/90 dark:text-tm-sand"
+                >
+                  <option value={1}>Enero</option>
+                  <option value={2}>Febrero</option>
+                  <option value={3}>Marzo</option>
+                  <option value={4}>Abril</option>
+                  <option value={5}>Mayo</option>
+                  <option value={6}>Junio</option>
+                  <option value={7}>Julio</option>
+                  <option value={8}>Agosto</option>
+                  <option value={9}>Septiembre</option>
+                  <option value={10}>Octubre</option>
+                  <option value={11}>Noviembre</option>
+                  <option value={12}>Diciembre</option>
+                </select>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  className="rounded-md border border-tm-copper/40 bg-white/90 px-3 py-1.5 text-sm text-tm-oxide dark:bg-tm-haze/90 dark:text-tm-sand"
+                >
+                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+                <span className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                  ({monthlyGamesCount} {monthlyGamesCount === 1 ? 'partida' : 'partidas'})
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {sortedPlayers.length === 0 ? (
+      {monthlyLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tm-copper"></div>
+        </div>
+      ) : sortedPlayers.length === 0 ? (
         <div className="px-6 py-12 text-center text-tm-oxide/70 dark:text-tm-sand/70">
           Aún no hay jugadores. ¡Agregá tu primer jugador para comenzar!
         </div>

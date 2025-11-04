@@ -26,10 +26,13 @@ function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError(null);
       const [allPlayers, rankedPlayers, allGames] = await Promise.all([
         getAllPlayers(),
@@ -49,7 +52,9 @@ function App() {
       setError(err instanceof Error ? err.message : 'Error al cargar datos');
       console.error('Error loading data:', err);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
@@ -59,6 +64,14 @@ function App() {
 
   const handleAddPlayer = async (name: string) => {
     if (!isAuthenticated) {
+      setPendingAction(() => async () => {
+        try {
+          await addPlayer(name);
+          await loadData();
+        } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error al agregar jugador');
+        }
+      });
       setShowLoginModal(true);
       return;
     }
@@ -72,12 +85,20 @@ function App() {
 
   const handleRecordGame = async (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
     if (!isAuthenticated) {
+      setPendingAction(() => async () => {
+        try {
+          await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
+          await loadData(true); // Silent reload
+        } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error al registrar partida');
+        }
+      });
       setShowLoginModal(true);
       return;
     }
     try {
       await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
-      await loadData();
+      await loadData(true); // Silent reload
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al registrar partida');
     }
@@ -85,6 +106,14 @@ function App() {
 
   const handleUndoLastGame = async () => {
     if (!isAuthenticated) {
+      setPendingAction(() => async () => {
+        try {
+          await deleteLastGame();
+          await loadData();
+        } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error al deshacer última partida');
+        }
+      });
       setShowLoginModal(true);
       return;
     }
@@ -98,6 +127,14 @@ function App() {
 
   const handleDeleteGame = async (gameId: string) => {
     if (!isAuthenticated) {
+      setPendingAction(() => async () => {
+        try {
+          await deleteGameById(gameId);
+          await loadData();
+        } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error al eliminar partida');
+        }
+      });
       setShowLoginModal(true);
       return;
     }
@@ -267,7 +304,7 @@ function App() {
         )}
 
         {!loading && !error && activeTab === 'addGame' && (
-          <AddGame players={players} onSubmit={handleRecordGame} onUndo={handleUndoLastGame} />
+          <AddGame players={players} games={games} onSubmit={handleRecordGame} onUndo={handleUndoLastGame} />
         )}
 
         {!loading && !error && activeTab === 'players' && (
@@ -339,11 +376,18 @@ function App() {
       {/* Login Modal */}
       <LoginModal
         isOpen={showLoginModal}
-        onLogin={() => {
+        onLogin={async () => {
           setIsAuthenticated(true);
           setShowLoginModal(false);
+          if (pendingAction) {
+            await pendingAction();
+            setPendingAction(null);
+          }
         }}
-        onClose={() => setShowLoginModal(false)}
+        onClose={() => {
+          setShowLoginModal(false);
+          setPendingAction(null);
+        }}
       />
     </div>
   );

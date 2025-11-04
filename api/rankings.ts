@@ -24,10 +24,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // Filter out players with no games
+    let filteredPlayers = players.filter(player => player.gamesPlayed > 0);
+
     // Filter active players if requested
-    let filteredPlayers = players;
     if (activeOnly) {
-      filteredPlayers = players.filter((player) => {
+      filteredPlayers = filteredPlayers.filter((player) => {
         if (player.ratingHistory.length === 0) return false;
         const lastGameDate = player.ratingHistory[player.ratingHistory.length - 1]?.date || 0;
         return now - lastGameDate <= DAYS_30_MS;

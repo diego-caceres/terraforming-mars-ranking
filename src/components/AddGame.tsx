@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { Player } from '../types';
+import type { Player, Game } from '../types';
 
 interface AddGameProps {
   players: Record<string, Player>;
+  games: Game[];
   onSubmit: (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => void;
   onUndo: () => void;
 }
 
 const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares'];
 
-export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
+export default function AddGame({ players, games, onSubmit, onUndo }: AddGameProps) {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [placements, setPlacements] = useState<string[]>([]);
   const [gameDate, setGameDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -91,11 +92,84 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
     setPlacements([]);
   };
 
+  // Get last 5 games
+  const recentGames = games.slice(0, 5);
+
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Hoy';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Ayer';
+    } else {
+      return date.toLocaleDateString('es-UY', { day: 'numeric', month: 'short' });
+    }
+  };
+
+  const getPlayerName = (playerId: string) => {
+    return players[playerId]?.name || 'Desconocido';
+  };
+
   return (
-    <div className="tm-card p-6 space-y-6">
-      <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-        Registrar Resultado de Partida
-      </h2>
+    <div className="space-y-6">
+      {/* Recent Games Summary */}
+      {recentGames.length > 0 && (
+        <div className="tm-card p-4">
+          <h3 className="text-sm font-heading uppercase tracking-[0.25em] text-tm-oxide/70 dark:text-tm-sand/70 mb-3">
+            Últimas Partidas Agregadas
+          </h3>
+          <div className="space-y-2">
+            {recentGames.map((game) => (
+              <div
+                key={game.id}
+                className="flex items-center justify-between text-xs border-l-2 border-tm-copper/40 pl-3 py-1.5"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-tm-oxide/60 dark:text-tm-sand/60 font-medium min-w-[3rem]">
+                    {formatDate(game.date)}
+                  </span>
+                  <span className="text-tm-oxide dark:text-tm-sand">
+                    <span className="font-semibold text-tm-copper">{getPlayerName(game.placements[0])}</span>
+                    {game.placements.length > 1 && (
+                      <span className="text-tm-oxide/60 dark:text-tm-sand/60">
+                        {' vs '}
+                        {game.placements.slice(1).map((id, idx) => (
+                          <span key={id}>
+                            {idx > 0 && ', '}
+                            {getPlayerName(id)}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                {game.expansions && game.expansions.length > 0 && (
+                  <div className="flex gap-1">
+                    {game.expansions.map((exp) => (
+                      <span
+                        key={exp}
+                        className="text-[0.65rem] px-1.5 py-0.5 rounded bg-tm-copper/20 text-tm-copper-dark dark:bg-tm-glow/20 dark:text-tm-glow"
+                      >
+                        {exp}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add Game Form */}
+      <div className="tm-card p-6 space-y-6">
+        <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
+          Registrar Resultado de Partida
+        </h2>
 
       {showSuccess && (
         <div className="rounded-lg border border-tm-teal/40 bg-tm-teal/15 px-4 py-3 text-sm text-tm-teal dark:bg-tm-teal/20 dark:text-tm-glow">
@@ -279,7 +353,7 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
               placements.length < 2 ? 'cursor-not-allowed opacity-60' : ''
             }`}
           >
-            Record Game
+            Agregar Partida
           </button>
           {placements.length > 0 && (
             <button
@@ -287,11 +361,12 @@ export default function AddGame({ players, onSubmit, onUndo }: AddGameProps) {
               onClick={handleReset}
               className="rounded-md border border-tm-copper/40 bg-white/75 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-tm-oxide transition-colors hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
             >
-              Reset
+              Resetear
             </button>
           )}
         </div>
       </form>
+      </div>
     </div>
   );
 }

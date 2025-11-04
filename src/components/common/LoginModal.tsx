@@ -3,7 +3,7 @@ import { authenticate, isValidPassword } from '../../services/authService';
 
 interface LoginModalProps {
     isOpen: boolean;
-    onLogin: () => void;
+    onLogin: () => void | Promise<void>;
     onClose: () => void;
 }
 

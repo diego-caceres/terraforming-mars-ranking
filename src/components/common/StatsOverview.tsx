@@ -25,7 +25,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
     } else if (diffDays < 7) {
       return `Hace ${diffDays} días`;
     } else {
-      return date.toLocaleDateString('en-US', {
+      return date.toLocaleDateString('es-UY', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
