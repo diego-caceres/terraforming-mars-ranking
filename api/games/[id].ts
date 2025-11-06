@@ -20,6 +20,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ game });
     }
 
+    if (req.method === 'PUT') {
+      // Update game metadata (only expansions and generations, not player order)
+      const game = await kv.get<Game>(KEYS.GAME(id));
+      if (!game) {
+        return res.status(404).json({ error: 'Partida no encontrada' });
+      }
+
+      const { expansions, generations } = req.body;
+
+      // Validate generations if provided
+      if (generations !== undefined) {
+        if (typeof generations !== 'number' || generations < 1 || generations > 16) {
+          return res.status(400).json({ error: 'Las generaciones deben ser un número entre 1 y 16' });
+        }
+      }
+
+      // Validate expansions if provided
+      if (expansions !== undefined) {
+        if (!Array.isArray(expansions)) {
+          return res.status(400).json({ error: 'Las expansiones deben ser un array' });
+        }
+      }
+
+      // Update only metadata fields
+      const updatedGame: Game = {
+        ...game,
+        ...(expansions !== undefined && { expansions }),
+        ...(generations !== undefined && { generations }),
+      };
+
+      // Save updated game
+      await kv.set(KEYS.GAME(id), updatedGame);
+
+      return res.status(200).json({
+        message: 'Partida actualizada',
+        game: updatedGame
+      });
+    }
+
     if (req.method === 'DELETE') {
       // Delete game and recalculate all ratings
       const game = await kv.get<Game>(KEYS.GAME(id));

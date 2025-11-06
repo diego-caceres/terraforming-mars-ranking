@@ -9,7 +9,7 @@ import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
 import { useDarkMode } from './hooks/useDarkMode';
-import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById } from './services/apiService';
+import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/apiService';
 import type { Player, Game, PlayerColor } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -165,6 +165,27 @@ function App() {
       await loadData();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar partida');
+    }
+  };
+
+  const handleUpdateGame = async (gameId: string, updates: { expansions?: string[]; generations?: number }) => {
+    if (!isAuthenticated) {
+      setPendingAction(() => async () => {
+        try {
+          await updateGameMetadata(gameId, updates);
+          await loadData();
+        } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error al actualizar partida');
+        }
+      });
+      setShowLoginModal(true);
+      return;
+    }
+    try {
+      await updateGameMetadata(gameId, updates);
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al actualizar partida');
     }
   };
 
@@ -366,7 +387,7 @@ function App() {
         )}
 
         {!loading && !error && activeTab === 'history' && (
-          <GameHistory games={games} players={players} onDeleteGame={handleDeleteGame} />
+          <GameHistory games={games} players={players} onDeleteGame={handleDeleteGame} onUpdateGame={handleUpdateGame} />
         )}
 
         {!loading && !error && activeTab === 'settings' && (

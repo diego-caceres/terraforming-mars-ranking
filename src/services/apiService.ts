@@ -98,6 +98,17 @@ export async function deleteLastGame(): Promise<{
   return data;
 }
 
+export async function updateGameMetadata(
+  gameId: string,
+  updates: { expansions?: string[]; generations?: number }
+): Promise<Game> {
+  const data = await apiCall<{ game: Game }>(`/games/${gameId}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+  return data.game;
+}
+
 // Player stats
 export async function getPlayerStats(playerId: string): Promise<{
   player: Player;

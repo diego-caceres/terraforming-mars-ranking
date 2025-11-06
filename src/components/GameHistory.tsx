@@ -5,10 +5,16 @@ interface GameHistoryProps {
   games: Game[];
   players: Record<string, Player>;
   onDeleteGame: (gameId: string) => void;
+  onUpdateGame: (gameId: string, updates: { expansions?: string[]; generations?: number }) => void;
 }
 
-export default function GameHistory({ games, players, onDeleteGame }: GameHistoryProps) {
+const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares'];
+
+export default function GameHistory({ games, players, onDeleteGame, onUpdateGame }: GameHistoryProps) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [editingGame, setEditingGame] = useState<string | null>(null);
+  const [editExpansions, setEditExpansions] = useState<string[]>([]);
+  const [editGenerations, setEditGenerations] = useState<string>('');
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -49,6 +55,46 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
         setSelectedGame(null);
       }
     }
+  };
+
+  const handleStartEdit = (game: Game, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setEditingGame(game.id);
+    setEditExpansions(game.expansions || []);
+    setEditGenerations(game.generations?.toString() || '');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingGame(null);
+    setEditExpansions([]);
+    setEditGenerations('');
+  };
+
+  const handleSaveEdit = (gameId: string) => {
+    const generationsNum = editGenerations ? parseInt(editGenerations, 10) : undefined;
+
+    // Validate generations
+    if (editGenerations && (isNaN(generationsNum!) || generationsNum! < 1 || generationsNum! > 16)) {
+      alert('Las generaciones deben ser un número entre 1 y 16');
+      return;
+    }
+
+    onUpdateGame(gameId, {
+      expansions: editExpansions,
+      generations: generationsNum,
+    });
+
+    setEditingGame(null);
+    setEditExpansions([]);
+    setEditGenerations('');
+  };
+
+  const toggleEditExpansion = (expansion: string) => {
+    setEditExpansions(prev =>
+      prev.includes(expansion)
+        ? prev.filter(e => e !== expansion)
+        : [...prev, expansion]
+    );
   };
 
   return (
@@ -118,6 +164,25 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => handleStartEdit(game, e)}
+                        className="rounded-full border border-transparent p-2 text-tm-oxide hover:border-tm-oxide/40 hover:bg-tm-oxide/10 dark:text-tm-sand dark:hover:bg-white/10"
+                        title="Editar partida"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </button>
                       <button
                         onClick={(e) => handleDeleteGame(game.id, e)}
                         className="rounded-full border border-transparent p-2 text-tm-copper hover:border-tm-copper/40 hover:bg-tm-copper/10 dark:text-tm-glow dark:hover:bg-white/10"
@@ -206,47 +271,113 @@ export default function GameHistory({ games, players, onDeleteGame }: GameHistor
                       })}
                     </div>
 
-                    {/* Game Details */}
-                    <div className="mt-5 border-t border-tm-copper/20 pt-4 dark:border-white/10">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                            ID de Partida:
-                          </span>
-                          <span className="ml-2 font-mono text-xs text-tm-oxide dark:text-tm-sand">
-                            {game.id}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                            Jugadores:
-                          </span>
-                          <span className="ml-2 text-tm-oxide dark:text-tm-sand">
-                            {game.placements.map(id => getPlayerName(id)).join(', ')}
-                          </span>
-                        </div>
-                        {game.generations && (
+                    {/* Edit Form */}
+                    {editingGame === game.id ? (
+                      <div className="mt-5 border-t border-tm-copper/20 pt-4 dark:border-white/10">
+                        <h3 className="mb-4 text-sm font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
+                          Editar Partida
+                        </h3>
+
+                        <div className="space-y-4">
+                          {/* Generations */}
                           <div>
-                            <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                              Generaciones:
-                            </span>
-                            <span className="ml-2 text-tm-oxide dark:text-tm-sand">
-                              {game.generations}
-                            </span>
+                            <label className="mb-2 block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
+                              Generaciones (1-16, opcional)
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="16"
+                              value={editGenerations}
+                              onChange={(e) => setEditGenerations(e.target.value)}
+                              placeholder="Ej: 12"
+                              className="w-full rounded-lg border border-tm-copper/30 bg-white px-4 py-2 text-tm-oxide transition focus:border-tm-copper focus:outline-none focus:ring-2 focus:ring-tm-copper/20 dark:border-white/20 dark:bg-tm-haze dark:text-tm-sand dark:focus:border-tm-glow dark:focus:ring-tm-glow/20"
+                            />
                           </div>
-                        )}
-                        {game.expansions && game.expansions.length > 0 && (
+
+                          {/* Expansions */}
                           <div>
-                            <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                              Expansiones:
-                            </span>
-                            <span className="ml-2 text-tm-oxide dark:text-tm-sand">
-                              {game.expansions.join(', ')}
-                            </span>
+                            <label className="mb-3 block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
+                              Expansiones
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {AVAILABLE_EXPANSIONS.map(expansion => (
+                                <button
+                                  key={expansion}
+                                  type="button"
+                                  onClick={() => toggleEditExpansion(expansion)}
+                                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                                    editExpansions.includes(expansion)
+                                      ? 'bg-tm-copper text-white shadow-md dark:bg-tm-glow dark:text-tm-oxide'
+                                      : 'border border-tm-copper/40 bg-transparent text-tm-oxide hover:bg-tm-copper/10 dark:border-white/20 dark:text-tm-sand dark:hover:bg-white/10'
+                                  }`}
+                                >
+                                  {expansion}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        )}
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-3 pt-2">
+                            <button
+                              onClick={() => handleSaveEdit(game.id)}
+                              className="flex-1 rounded-lg bg-tm-teal px-6 py-2.5 font-semibold text-white shadow-md transition hover:bg-tm-teal/90 dark:bg-tm-glow dark:text-tm-oxide dark:hover:bg-tm-glow/90"
+                            >
+                              Guardar Cambios
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="flex-1 rounded-lg border border-tm-copper/40 bg-transparent px-6 py-2.5 font-semibold text-tm-oxide transition hover:bg-tm-copper/10 dark:border-white/20 dark:text-tm-sand dark:hover:bg-white/10"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      /* Game Details */
+                      <div className="mt-5 border-t border-tm-copper/20 pt-4 dark:border-white/10">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                              ID de Partida:
+                            </span>
+                            <span className="ml-2 font-mono text-xs text-tm-oxide dark:text-tm-sand">
+                              {game.id}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                              Jugadores:
+                            </span>
+                            <span className="ml-2 text-tm-oxide dark:text-tm-sand">
+                              {game.placements.map(id => getPlayerName(id)).join(', ')}
+                            </span>
+                          </div>
+                          {game.generations && (
+                            <div>
+                              <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                                Generaciones:
+                              </span>
+                              <span className="ml-2 text-tm-oxide dark:text-tm-sand">
+                                {game.generations}
+                              </span>
+                            </div>
+                          )}
+                          {game.expansions && game.expansions.length > 0 && (
+                            <div>
+                              <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+                                Expansiones:
+                              </span>
+                              <span className="ml-2 text-tm-oxide dark:text-tm-sand">
+                                {game.expansions.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
