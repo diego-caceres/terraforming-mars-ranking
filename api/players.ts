@@ -37,10 +37,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
+      const startingRating = getStartingRating();
       const newPlayer: Player = {
         id: crypto.randomUUID(),
         name: name.trim(),
-        currentRating: getStartingRating(),
+        currentRating: startingRating,
+        peakRating: startingRating,
         gamesPlayed: 0,
         wins: 0,
         createdAt: Date.now(),

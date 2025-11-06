@@ -84,10 +84,12 @@ export function applyRatingChanges(
     const newRating = player.currentRating + ratingChange;
 
     const isWin = index === 0;
+    const peakRating = Math.max(player.peakRating || STARTING_RATING, newRating);
 
     updatedPlayers[playerId] = {
       ...player,
       currentRating: newRating,
+      peakRating,
       gamesPlayed: player.gamesPlayed + 1,
       wins: player.wins + (isWin ? 1 : 0),
       ratingHistory: [

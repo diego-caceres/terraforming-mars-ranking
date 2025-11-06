@@ -28,7 +28,8 @@ Aplicación web para trackear rankings del juego de mesa "Terraforming Mars" usa
 ### Funcionalidades Implementadas
 
 1. **Rankings** (`/src/components/Rankings.tsx`)
-   - Tabla sorteable (por rating, partidas, % victorias)
+   - Tabla sorteable (por rating, pico, partidas, % victorias)
+   - Columna "Pico" muestra el rating más alto alcanzado por cada jugador
    - Filtro de jugadores activos
    - Click en jugador abre modal de estadísticas
 
@@ -111,11 +112,12 @@ interface Player {
   id: string;
   name: string;
   currentRating: number;
+  peakRating: number;              // Rating más alto alcanzado
   gamesPlayed: number;
   wins: number;
   ratingHistory: RatingHistoryEntry[];
   createdAt: number;
-  lastPlayedAt: number | null;
+  color?: PlayerColor;             // Color asignado al jugador
 }
 
 interface Game {
@@ -181,6 +183,26 @@ interface Game {
 6. **Validación de jugadores:** No permite nombres duplicados (case-insensitive)
 7. **Undo temporal:** 10 segundos para deshacer última partida
 8. **Conexión requerida:** La app requiere internet para funcionar (no hay fallback offline)
+
+## Scripts de Migración
+
+### Migración de Ratings Pico Históricos
+
+Cuando se agregó la funcionalidad de peak rating, los jugadores existentes no tenían este valor calculado. El script `migrate-peak-ratings.ts` calcula el pico histórico basándose en el historial de rating de cada jugador.
+
+**Ejecutar migración:**
+```bash
+npm run migrate:peak-ratings
+```
+
+El script:
+- Analiza el historial completo de cada jugador
+- Encuentra el rating más alto alcanzado
+- Actualiza el campo `peakRating` en la base de datos
+- Es idempotente (se puede ejecutar múltiples veces sin problemas)
+- Muestra un resumen de cambios realizados
+
+Ver documentación completa en `/scripts/README.md`
 
 ## Próximas Mejoras Potenciales
 

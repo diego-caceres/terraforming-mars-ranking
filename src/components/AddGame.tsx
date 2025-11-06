@@ -12,7 +12,7 @@ interface AddGameProps {
   onUndo: () => void;
 }
 
-const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares'];
+const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares', 'Pathfinders', 'Colonies', 'The Moon'];
 
 export default function AddGame({ players, games, onSubmit, onUndo }: AddGameProps) {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);

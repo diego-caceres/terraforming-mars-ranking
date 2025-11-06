@@ -4,6 +4,7 @@ export interface Player {
   id: string;
   name: string;
   currentRating: number;
+  peakRating: number;
   gamesPlayed: number;
   wins: number;
   createdAt: number;

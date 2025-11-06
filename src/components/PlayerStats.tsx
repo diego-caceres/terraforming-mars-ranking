@@ -124,11 +124,11 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                   className="inline-flex items-center gap-2 rounded-full border border-tm-copper/30 bg-white/80 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-tm-oxide dark:border-white/20 dark:bg-tm-haze/70 dark:text-tm-sand"
                   title={`Color: ${stats.player.color}`}
                 >
+                  Color
                   <span
                     className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(stats.player.color)}`}
                     aria-hidden="true"
                   />
-                  {stats.player.color}
                 </span>
               )}
             </div>

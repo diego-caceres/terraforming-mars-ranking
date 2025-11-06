@@ -15,7 +15,7 @@ interface RankingsProps {
 type ViewMode = 'allTime' | 'monthly';
 
 export default function Rankings({ players, activeOnly, onPlayerClick, onToggleActiveFilter }: RankingsProps) {
-  const [sortBy, setSortBy] = useState<'rating' | 'games' | 'winRate'>('rating');
+  const [sortBy, setSortBy] = useState<'rating' | 'peakRating' | 'games' | 'winRate'>('rating');
   const [viewMode, setViewMode] = useState<ViewMode>('allTime');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -140,6 +140,8 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
     switch (sortBy) {
       case 'rating':
         return b.currentRating - a.currentRating;
+      case 'peakRating':
+        return (b.peakRating || b.currentRating) - (a.peakRating || a.currentRating);
       case 'games':
         return b.gamesPlayed - a.gamesPlayed;
       case 'winRate':
@@ -203,6 +205,16 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
             }`}
           >
             Por Rating
+          </button>
+          <button
+            onClick={() => setSortBy('peakRating')}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${
+              sortBy === 'peakRating'
+                ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
+            }`}
+          >
+            Por Pico
           </button>
           <button
             onClick={() => setSortBy('games')}
@@ -315,6 +327,9 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                   Rating
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
+                  Pico
+                </th>
+                <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
                   Partidas
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
@@ -362,6 +377,9 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-tm-oxide dark:text-tm-sand">
                       {Math.round(player.currentRating)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-tm-copper/80 dark:text-tm-glow/80">
+                      {Math.round(player.peakRating || player.currentRating)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-tm-oxide/70 dark:text-tm-sand/70">
                       {player.gamesPlayed}

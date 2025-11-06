@@ -43,9 +43,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const playerId of playerIds) {
       const player = await kv.get<Player>(KEYS.PLAYER(playerId));
       if (player) {
+        const startingRating = getStartingRating();
         players[playerId] = {
           ...player,
-          currentRating: getStartingRating(),
+          currentRating: startingRating,
+          peakRating: startingRating,
           gamesPlayed: 0,
           wins: 0,
           ratingHistory: [],

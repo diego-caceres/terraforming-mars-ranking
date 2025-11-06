@@ -20,7 +20,7 @@ function App() {
   const [players, setPlayers] = useState<Record<string, Player>>({});
   const [rankings, setRankings] = useState<Player[]>([]);
   const [games, setGames] = useState<Game[]>([]);
-  const [activeOnly, setActiveOnly] = useState(false);
+  const [activeOnly, setActiveOnly] = useState(true);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
