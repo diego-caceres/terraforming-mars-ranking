@@ -112,7 +112,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <div className="tm-card relative w-full max-h-[90vh] max-w-4xl overflow-y-auto">
         {/* Header */}
-        <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5">
+        <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5 bg-tm-sand/95 dark:bg-tm-haze/95 backdrop-blur-sm">
           <div>
             <p className="tm-card-subtitle">Expediente de Piloto</p>
             <div className="flex flex-wrap items-center gap-3">
@@ -146,13 +146,21 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
 
         <div className="p-6 space-y-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
               <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
                 Rating Actual
               </div>
               <div className="mt-2 text-3xl font-bold text-tm-copper dark:text-tm-glow">
                 {Math.round(stats.player.currentRating)}
+              </div>
+            </div>
+            <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
+              <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
+                Rating Pico
+              </div>
+              <div className="mt-2 text-3xl font-bold text-tm-copper/80 dark:text-tm-glow/80">
+                {Math.round(stats.player.peakRating || stats.player.currentRating)}
               </div>
             </div>
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">

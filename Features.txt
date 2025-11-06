@@ -1,5 +1,3 @@
-- Elo mas alto de cada jugador
 - Agregar Corporación jugada por jugador
 - Editar corporacion
-- Solo activos por defecto
 - Subir imagenes como highlights
