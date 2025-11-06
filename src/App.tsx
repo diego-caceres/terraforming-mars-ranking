@@ -8,8 +8,10 @@ import DarkModeToggle from './components/common/DarkModeToggle';
 import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
+import { RankingsProvider } from './contexts/RankingsContext';
 import { useDarkMode } from './hooks/useDarkMode';
 import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/apiService';
+import { invalidateMonthlyRankingsCache } from './utils/storageUtils';
 import type { Player, Game, PlayerColor } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -110,6 +112,7 @@ function App() {
       setPendingAction(() => async () => {
         try {
           await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
+          invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
           await loadData(true); // Silent reload
         } catch (err) {
           alert(err instanceof Error ? err.message : 'Error al registrar partida');
@@ -120,6 +123,7 @@ function App() {
     }
     try {
       await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
+      invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
       await loadData(true); // Silent reload
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al registrar partida');
@@ -131,6 +135,7 @@ function App() {
       setPendingAction(() => async () => {
         try {
           await deleteLastGame();
+          invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
           await loadData();
         } catch (err) {
           alert(err instanceof Error ? err.message : 'Error al deshacer última partida');
@@ -141,6 +146,7 @@ function App() {
     }
     try {
       await deleteLastGame();
+      invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
       await loadData();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al deshacer última partida');
@@ -152,6 +158,7 @@ function App() {
       setPendingAction(() => async () => {
         try {
           await deleteGameById(gameId);
+          invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
           await loadData();
         } catch (err) {
           alert(err instanceof Error ? err.message : 'Error al eliminar partida');
@@ -162,6 +169,7 @@ function App() {
     }
     try {
       await deleteGameById(gameId);
+      invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
       await loadData();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar partida');
@@ -215,7 +223,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80 backdrop-blur-xl">
+    <RankingsProvider>
+      <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80 backdrop-blur-xl">
       {/* Header */}
       <header className="bg-gradient-to-r from-tm-copper via-tm-copper-dark to-tm-oxide text-white shadow-lg border-b border-white/10">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-3 sm:py-4 md:py-5">
@@ -366,6 +375,8 @@ function App() {
             <StatsOverview games={games} players={players} />
             <Rankings
               players={rankings}
+              allPlayers={Object.values(players)}
+              allGames={games}
               activeOnly={activeOnly}
               onPlayerClick={handlePlayerClick}
               onToggleActiveFilter={handleToggleActiveFilter}
@@ -460,7 +471,8 @@ function App() {
           setPendingAction(null);
         }}
       />
-    </div>
+      </div>
+    </RankingsProvider>
   );
 }
 

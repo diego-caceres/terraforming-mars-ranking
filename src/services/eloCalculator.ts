@@ -3,6 +3,10 @@ import type { Player, Game } from '../types';
 const K_FACTOR = 40;
 const STARTING_RATING = 1500;
 
+// Constantes para ranking mensual independiente
+const MONTHLY_K_FACTOR = 32;
+const MONTHLY_CONFIDENCE_THRESHOLD = 5;
+
 /**
  * Calculate expected score for a player against an opponent
  * E = 1 / (1 + 10^((opponent_rating - player_rating) / 400))
@@ -35,7 +39,8 @@ export function calculateActualScore(
  */
 export function calculateEloChanges(
   placements: string[], // Ordered array of player IDs (1st place, 2nd place, etc.)
-  players: Record<string, Player>
+  players: Record<string, Player>,
+  kFactor: number = K_FACTOR
 ): Record<string, number> {
   const ratingChanges: Record<string, number> = {};
 
@@ -60,7 +65,7 @@ export function calculateEloChanges(
       const actualScore = calculateActualScore(playerIndex, opponentIndex);
 
       // Rating change = K * (actual - expected)
-      totalChange += K_FACTOR * (actualScore - expectedScore);
+      totalChange += kFactor * (actualScore - expectedScore);
     });
 
     ratingChanges[playerId] = Math.round(totalChange);
@@ -88,9 +93,13 @@ export function applyRatingChanges(
     // Count win (1st place only)
     const isWin = index === 0;
 
+    // Track peak rating
+    const peakRating = Math.max(player.peakRating || STARTING_RATING, newRating);
+
     updatedPlayers[playerId] = {
       ...player,
       currentRating: newRating,
+      peakRating,
       gamesPlayed: player.gamesPlayed + 1,
       wins: player.wins + (isWin ? 1 : 0),
       ratingHistory: [
@@ -118,6 +127,20 @@ export function getStartingRating(): number {
 /**
  * Determine if a player should show a confidence indicator
  */
-export function hasLowConfidence(player: Player): boolean {
-  return player.gamesPlayed < 10;
+export function hasLowConfidence(player: Player, threshold: number = 10): boolean {
+  return player.gamesPlayed < threshold;
+}
+
+/**
+ * Get K-factor for monthly independent rankings
+ */
+export function getMonthlyKFactor(): number {
+  return MONTHLY_K_FACTOR;
+}
+
+/**
+ * Get confidence threshold for monthly independent rankings
+ */
+export function getMonthlyConfidenceThreshold(): number {
+  return MONTHLY_CONFIDENCE_THRESHOLD;
 }

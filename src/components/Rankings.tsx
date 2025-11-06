@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
-import type { Player } from '../types';
+import type { Player, Game } from '../types';
 import { hasLowConfidence } from '../services/eloCalculator';
 import { getMonthlyRankings } from '../services/apiService';
 import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
+import { useRankings } from '../contexts/RankingsContext';
 
 interface RankingsProps {
   players: Player[];
+  allPlayers: Player[];
+  allGames: Game[];
   activeOnly: boolean;
   onPlayerClick: (playerId: string) => void;
   onToggleActiveFilter: () => void;
 }
 
-type ViewMode = 'allTime' | 'monthly';
+type ViewMode = 'allTime' | 'monthly' | 'monthlyIndependent';
 
-export default function Rankings({ players, activeOnly, onPlayerClick, onToggleActiveFilter }: RankingsProps) {
+export default function Rankings({ players, allPlayers, allGames, activeOnly, onPlayerClick, onToggleActiveFilter }: RankingsProps) {
+  const { getMonthlyIndependentRankings: getMonthlyIndependentRankingsFromContext } = useRankings();
   const [sortBy, setSortBy] = useState<'rating' | 'peakRating' | 'games' | 'winRate'>('rating');
   const [viewMode, setViewMode] = useState<ViewMode>('allTime');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -43,7 +47,7 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
 
   // Load monthly rankings when month/year changes
   useEffect(() => {
-    if (viewMode === 'monthly') {
+    if (viewMode === 'monthly' || viewMode === 'monthlyIndependent') {
       loadMonthlyRankings();
     }
   }, [viewMode, selectedYear, selectedMonth]);
@@ -66,10 +70,10 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
 
     setLast3MonthsData(months);
 
-    // Load data for first 3 months (most recent)
+    // Load data for first 3 months (most recent) - using client-side calculation with cache
     for (let i = 0; i < 3; i++) {
       try {
-        const data = await getMonthlyRankings(months[i].year, months[i].month);
+        const data = await getMonthlyIndependentRankingsFromContext(months[i].year, months[i].month, allPlayers, allGames);
         setLast3MonthsData(prev => {
           const updated = [...prev];
           updated[i] = {
@@ -93,10 +97,10 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
       }
     }
 
-    // Load data for next 3 months (older) after first 3 are loaded
+    // Load data for next 3 months (older) after first 3 are loaded - using client-side calculation with cache
     for (let i = 3; i < 6; i++) {
       try {
-        const data = await getMonthlyRankings(months[i].year, months[i].month);
+        const data = await getMonthlyIndependentRankingsFromContext(months[i].year, months[i].month, allPlayers, allGames);
         setLast3MonthsData(prev => {
           const updated = [...prev];
           updated[i] = {
@@ -124,7 +128,9 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
   const loadMonthlyRankings = async () => {
     try {
       setMonthlyLoading(true);
-      const data = await getMonthlyRankings(selectedYear, selectedMonth);
+      const data = viewMode === 'monthlyIndependent'
+        ? await getMonthlyIndependentRankingsFromContext(selectedYear, selectedMonth, allPlayers, allGames)
+        : await getMonthlyRankings(selectedYear, selectedMonth);
       setMonthlyPlayers(data.rankings);
       setMonthlyGamesCount(data.gamesCount);
     } catch (error) {
@@ -242,7 +248,7 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
         <div className="mt-4 border-t border-tm-copper/20 pt-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* View Mode Toggle */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setViewMode('allTime')}
                 className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
@@ -261,12 +267,22 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                     : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
                 }`}
               >
-                Mensual
+                Mensual Acumulado
+              </button>
+              <button
+                onClick={() => setViewMode('monthlyIndependent')}
+                className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
+                  viewMode === 'monthlyIndependent'
+                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg'
+                    : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
+                }`}
+              >
+                Mensual Independiente
               </button>
             </div>
 
-            {/* Month/Year Selector (only show in monthly mode) */}
-            {viewMode === 'monthly' && (
+            {/* Month/Year Selector (only show in monthly modes) */}
+            {(viewMode === 'monthly' || viewMode === 'monthlyIndependent') && (
               <div className="flex items-center gap-2">
                 <select
                   value={selectedMonth}
@@ -301,6 +317,18 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
               </div>
             )}
           </div>
+
+          {/* Explanation text for monthly modes */}
+          {viewMode === 'monthly' && (
+            <div className="mt-3 text-xs text-tm-oxide/60 dark:text-tm-sand/60 bg-tm-copper/5 dark:bg-white/5 rounded-md px-3 py-2">
+              💡 <strong>Mensual Acumulado:</strong> Muestra el Elo histórico de cada jugador al final del mes seleccionado (rating acumulado desde el inicio).
+            </div>
+          )}
+          {viewMode === 'monthlyIndependent' && (
+            <div className="mt-3 text-xs text-tm-oxide/60 dark:text-tm-sand/60 bg-tm-copper/5 dark:bg-white/5 rounded-md px-3 py-2">
+              💡 <strong>Mensual Independiente:</strong> Todos los jugadores arrancan en 1500 y solo se consideran las partidas de este mes (K-factor: 32, umbral de confianza: 5 partidas).
+            </div>
+          )}
         </div>
       </div>
 
@@ -344,7 +372,9 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
               {sortedPlayers.map((player, index) => {
                 const ratingChange = getRatingChange(player);
                 const winRate = getWinRate(player);
-                const lowConfidence = hasLowConfidence(player);
+                // Use different confidence threshold based on view mode
+                const confidenceThreshold = viewMode === 'monthlyIndependent' ? 5 : 10;
+                const lowConfidence = hasLowConfidence(player, confidenceThreshold);
 
                 return (
                   <tr
@@ -413,9 +443,14 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
       {/* Last 6 Months Rankings - Only show in allTime view */}
       {viewMode === 'allTime' && last3MonthsData.length > 0 && (
         <div className="border-t border-tm-copper/20 dark:border-white/10 pt-6 px-6 pb-6">
-          <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow mb-4">
-            Rankings Mensuales
-          </h3>
+          <div className="mb-4">
+            <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
+              Rankings Mensuales Independientes
+            </h3>
+            <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
+              Todos los jugadores arrancan en 1500 cada mes. K-factor ajustado a 32 (vs. 40 histórico) para reducir la volatilidad en períodos cortos.
+            </p>
+          </div>
           <div className="space-y-4">
             {/* First 3 months */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -439,31 +474,50 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                     </div>
                   ) : (
                     <div className="divide-y divide-tm-copper/10 dark:divide-white/5">
-                      {monthData.rankings.slice(0, 5).map((player, playerIdx) => (
-                        <div
-                          key={player.id}
-                          onClick={() => onPlayerClick(player.id)}
-                          className="px-4 py-3 flex items-center gap-3 hover:bg-tm-copper/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                        >
-                          <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${getPodiumClasses(playerIdx + 1)}`}>
-                            {playerIdx + 1}
-                          </div>
-                          {player.color && (
-                            <div
-                              className={`w-2.5 h-2.5 rounded-full border-2 ${getColorClasses(player.color)}`}
-                              title={player.color}
-                            />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold text-tm-oxide dark:text-tm-sand truncate">
-                              {player.name}
+                      {monthData.rankings.slice(0, 5).map((player, playerIdx) => {
+                        const winRate = player.gamesPlayed > 0 ? (player.wins / player.gamesPlayed) * 100 : 0;
+                        const lastChange = player.ratingHistory.length > 0 ? player.ratingHistory[player.ratingHistory.length - 1].change : null;
+                        return (
+                          <div
+                            key={player.id}
+                            onClick={() => onPlayerClick(player.id)}
+                            className="px-4 py-2.5 hover:bg-tm-copper/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white flex-shrink-0 ${getPodiumClasses(playerIdx + 1)}`}>
+                                {playerIdx + 1}
+                              </div>
+                              {player.color && (
+                                <div
+                                  className={`w-2.5 h-2.5 rounded-full border-2 flex-shrink-0 ${getColorClasses(player.color)}`}
+                                  title={player.color}
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-tm-oxide dark:text-tm-sand truncate">
+                                  {player.name}
+                                </div>
+                              </div>
+                              <div className="text-sm font-bold text-tm-oxide dark:text-tm-glow flex-shrink-0">
+                                {Math.round(player.currentRating)}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1.5 ml-9 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                              <span>{player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida' : 'partidas'}</span>
+                              <span>•</span>
+                              <span>{winRate.toFixed(1)}% victorias</span>
+                              {lastChange !== null && (
+                                <>
+                                  <span>•</span>
+                                  <span className={lastChange > 0 ? 'text-tm-teal' : lastChange < 0 ? 'text-tm-copper-dark' : ''}>
+                                    {lastChange > 0 ? '+' : ''}{lastChange}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
-                          <div className="text-sm font-bold text-tm-oxide dark:text-tm-glow">
-                            {Math.round(player.currentRating)}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {monthData.rankings.length > 5 && (
                         <div className="px-4 py-2 text-center text-xs text-tm-oxide/50 dark:text-tm-sand/50">
                           +{monthData.rankings.length - 5} más
@@ -497,31 +551,50 @@ export default function Rankings({ players, activeOnly, onPlayerClick, onToggleA
                   </div>
                 ) : (
                   <div className="divide-y divide-tm-copper/10 dark:divide-white/5">
-                    {monthData.rankings.slice(0, 5).map((player, playerIdx) => (
-                      <div
-                        key={player.id}
-                        onClick={() => onPlayerClick(player.id)}
-                        className="px-4 py-3 flex items-center gap-3 hover:bg-tm-copper/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                      >
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${getPodiumClasses(playerIdx + 1)}`}>
-                          {playerIdx + 1}
-                        </div>
-                        {player.color && (
-                          <div
-                            className={`w-2.5 h-2.5 rounded-full border-2 ${getColorClasses(player.color)}`}
-                            title={player.color}
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-tm-oxide dark:text-tm-sand truncate">
-                            {player.name}
+                    {monthData.rankings.slice(0, 5).map((player, playerIdx) => {
+                      const winRate = player.gamesPlayed > 0 ? (player.wins / player.gamesPlayed) * 100 : 0;
+                      const lastChange = player.ratingHistory.length > 0 ? player.ratingHistory[player.ratingHistory.length - 1].change : null;
+                      return (
+                        <div
+                          key={player.id}
+                          onClick={() => onPlayerClick(player.id)}
+                          className="px-4 py-2.5 hover:bg-tm-copper/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white flex-shrink-0 ${getPodiumClasses(playerIdx + 1)}`}>
+                              {playerIdx + 1}
+                            </div>
+                            {player.color && (
+                              <div
+                                className={`w-2.5 h-2.5 rounded-full border-2 flex-shrink-0 ${getColorClasses(player.color)}`}
+                                title={player.color}
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-semibold text-tm-oxide dark:text-tm-sand truncate">
+                                {player.name}
+                              </div>
+                            </div>
+                            <div className="text-sm font-bold text-tm-oxide dark:text-tm-glow flex-shrink-0">
+                              {Math.round(player.currentRating)}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 mt-1.5 ml-9 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                            <span>{player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida' : 'partidas'}</span>
+                            <span>•</span>
+                            <span>{winRate.toFixed(1)}% victorias</span>
+                            {lastChange !== null && (
+                              <>
+                                <span>•</span>
+                                <span className={lastChange > 0 ? 'text-tm-teal' : lastChange < 0 ? 'text-tm-copper-dark' : ''}>
+                                  {lastChange > 0 ? '+' : ''}{lastChange}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
-                        <div className="text-sm font-bold text-tm-oxide dark:text-tm-glow">
-                          {Math.round(player.currentRating)}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {monthData.rankings.length > 5 && (
                       <div className="px-4 py-2 text-center text-xs text-tm-oxide/50 dark:text-tm-sand/50">
                         +{monthData.rankings.length - 5} más

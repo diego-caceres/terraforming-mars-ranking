@@ -61,6 +61,15 @@ export async function getMonthlyRankings(year: number, month: number): Promise<{
   return apiCall(`/rankings/monthly?year=${year}&month=${month}`);
 }
 
+export async function getMonthlyIndependentRankings(year: number, month: number): Promise<{
+  rankings: Player[];
+  year: number;
+  month: number;
+  gamesCount: number;
+}> {
+  return apiCall(`/rankings/monthly-independent?year=${year}&month=${month}`);
+}
+
 // Game operations
 export async function getAllGames(): Promise<Game[]> {
   const data = await apiCall<{ games: Game[] }>('/games');
