@@ -8,6 +8,8 @@ import DarkModeToggle from './components/common/DarkModeToggle';
 import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
+import StatsOverviewSkeleton from './components/common/StatsOverviewSkeleton';
+import RankingsTableSkeleton from './components/common/RankingsTableSkeleton';
 import { RankingsProvider } from './contexts/RankingsContext';
 import { useDarkMode } from './hooks/useDarkMode';
 import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/apiService';
@@ -367,6 +369,13 @@ function App() {
             >
               Reintentar
             </button>
+          </div>
+        )}
+
+        {loading && activeTab === 'rankings' && (
+          <div className="space-y-6">
+            <StatsOverviewSkeleton />
+            <RankingsTableSkeleton />
           </div>
         )}
 

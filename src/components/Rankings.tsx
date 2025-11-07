@@ -5,6 +5,7 @@ import { getMonthlyRankings } from '../services/apiService';
 import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
 import { useRankings } from '../contexts/RankingsContext';
+import MonthlyRankingSkeleton from './common/MonthlyRankingSkeleton';
 
 interface RankingsProps {
   players: Player[];
@@ -455,20 +456,19 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
             {/* First 3 months */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {last3MonthsData.slice(0, 3).map((monthData, idx) => (
-                <div key={idx} className="rounded-lg border border-tm-copper/30 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-tm-haze/40">
-                  <div className="bg-tm-copper/10 dark:bg-white/5 px-4 py-3 border-b border-tm-copper/20 dark:border-white/10">
-                    <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-sand">
-                      {getMonthName(monthData.month)} {monthData.year}
-                    </h4>
-                    <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
-                      {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
-                    </p>
-                  </div>
-                  {monthData.loading ? (
-                    <div className="flex justify-center items-center py-8">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tm-copper"></div>
+                monthData.loading ? (
+                  <MonthlyRankingSkeleton key={idx} />
+                ) : (
+                  <div key={idx} className="rounded-lg border border-tm-copper/30 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-tm-haze/40">
+                    <div className="bg-tm-copper/10 dark:bg-white/5 px-4 py-3 border-b border-tm-copper/20 dark:border-white/10">
+                      <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-sand">
+                        {getMonthName(monthData.month)} {monthData.year}
+                      </h4>
+                      <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
+                        {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
+                      </p>
                     </div>
-                  ) : monthData.rankings.length === 0 ? (
+                    {monthData.rankings.length === 0 ? (
                     <div className="px-4 py-8 text-center text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                       Sin partidas este mes
                     </div>
@@ -524,28 +524,28 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )
               ))}
             </div>
 
             {/* Next 3 months */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {last3MonthsData.slice(3, 6).map((monthData, idx) => (
-              <div key={idx} className="rounded-lg border border-tm-copper/30 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-tm-haze/40">
-                <div className="bg-tm-copper/10 dark:bg-white/5 px-4 py-3 border-b border-tm-copper/20 dark:border-white/10">
-                  <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-sand">
-                    {getMonthName(monthData.month)} {monthData.year}
-                  </h4>
-                  <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
-                    {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
-                  </p>
-                </div>
-                {monthData.loading ? (
-                  <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tm-copper"></div>
-                  </div>
-                ) : monthData.rankings.length === 0 ? (
+                monthData.loading ? (
+                  <MonthlyRankingSkeleton key={idx + 3} />
+                ) : (
+                  <div key={idx + 3} className="rounded-lg border border-tm-copper/30 dark:border-white/10 overflow-hidden bg-white/60 dark:bg-tm-haze/40">
+                    <div className="bg-tm-copper/10 dark:bg-white/5 px-4 py-3 border-b border-tm-copper/20 dark:border-white/10">
+                      <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-sand">
+                        {getMonthName(monthData.month)} {monthData.year}
+                      </h4>
+                      <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
+                        {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
+                      </p>
+                    </div>
+                    {monthData.rankings.length === 0 ? (
                   <div className="px-4 py-8 text-center text-xs text-tm-oxide/60 dark:text-tm-sand/60">
                     Sin partidas este mes
                   </div>
@@ -600,10 +600,11 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                         +{monthData.rankings.length - 5} más
                       </div>
                     )}
+                    </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+                )
+              ))}
           </div>
         </div>
         </div>
