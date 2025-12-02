@@ -1,5 +1,12 @@
 import type { Player } from '../types';
 
+/**
+ * Cache version - increment this when cache structure or logic changes
+ * This will automatically invalidate all old caches for users on previous versions
+ */
+const CACHE_VERSION = 2;
+const CACHE_VERSION_KEY = 'cache:version';
+
 export interface CachedRanking {
   rankings: Player[];
   gamesCount: number;
@@ -102,4 +109,41 @@ export function setCachedMonthlyRankings(cacheKey: string, data: CachedRanking):
  */
 export function invalidateMonthlyRankingsCache(): void {
   clearStorageByPrefix('rankings:monthly:');
+}
+
+/**
+ * Invalidate monthly rankings cache for a specific month
+ */
+export function invalidateMonthlyRankingsCacheForMonth(year: number, month: number): void {
+  const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+  clearStorageByPrefix(`rankings:monthly:independent:${monthStr}`);
+  clearStorageByPrefix(`rankings:monthly:accumulated:${monthStr}`);
+}
+
+/**
+ * Check if cache version has changed and invalidate all caches if needed
+ * Call this on app initialization
+ */
+export function checkAndMigrateCacheVersion(): boolean {
+  if (!isLocalStorageAvailable()) return false;
+
+  try {
+    const storedVersion = localStorage.getItem(CACHE_VERSION_KEY);
+    const currentVersion = CACHE_VERSION.toString();
+
+    if (storedVersion !== currentVersion) {
+      // Version mismatch or first time - clear all ranking caches
+      console.log(`Cache version changed (${storedVersion || 'none'} → ${currentVersion}). Invalidating all caches.`);
+      invalidateMonthlyRankingsCache();
+
+      // Update stored version
+      localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error checking cache version:', error);
+    return false;
+  }
 }

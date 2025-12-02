@@ -13,7 +13,7 @@ import RankingsTableSkeleton from './components/common/RankingsTableSkeleton';
 import { RankingsProvider } from './contexts/RankingsContext';
 import { useDarkMode } from './hooks/useDarkMode';
 import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/storageService';
-import { invalidateMonthlyRankingsCache } from './utils/storageUtils';
+import { invalidateMonthlyRankingsCache, invalidateMonthlyRankingsCacheForMonth, checkAndMigrateCacheVersion } from './utils/storageUtils';
 import { requiresAuthentication } from './services/authService';
 import type { Player, Game, PlayerColor } from './types';
 
@@ -63,6 +63,11 @@ function App() {
       }
     }
   };
+
+  // Check cache version on mount and migrate if needed
+  useEffect(() => {
+    checkAndMigrateCacheVersion();
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -118,11 +123,18 @@ function App() {
   };
 
   const handleRecordGame = async (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
+    // Extract year and month from the game date to invalidate specific cache
+    // Use UTC to match the monthly rankings calculation logic
+    const gameDateTime = new Date(gameDate);
+    const gameYear = gameDateTime.getUTCFullYear();
+    const gameMonth = gameDateTime.getUTCMonth() + 1;
+
     if (!isAuthenticated) {
       setPendingAction(() => async () => {
         try {
           await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
-          invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
+          // Invalidate cache for the specific month of the game
+          invalidateMonthlyRankingsCacheForMonth(gameYear, gameMonth);
           await loadData(true); // Silent reload
         } catch (err) {
           alert(err instanceof Error ? err.message : 'Error al registrar partida');
@@ -133,7 +145,8 @@ function App() {
     }
     try {
       await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
-      invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
+      // Invalidate cache for the specific month of the game
+      invalidateMonthlyRankingsCacheForMonth(gameYear, gameMonth);
       await loadData(true); // Silent reload
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al registrar partida');
