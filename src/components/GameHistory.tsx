@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Game, Player } from '../types';
+import { useI18n, formatDate as formatDateI18n } from '../i18n';
 
 interface GameHistoryProps {
   games: Game[];
@@ -11,13 +12,14 @@ interface GameHistoryProps {
 const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares'];
 
 export default function GameHistory({ games, players, onDeleteGame, onUpdateGame }: GameHistoryProps) {
+  const { t, language } = useI18n();
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [editExpansions, setEditExpansions] = useState<string[]>([]);
   const [editGenerations, setEditGenerations] = useState<string>('');
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
+    return formatDateI18n(new Date(timestamp), language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -25,7 +27,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
   };
 
   const getPlayerName = (playerId: string) => {
-    return players[playerId]?.name || 'Jugador Desconocido';
+    return players[playerId]?.name || t.gameHistory.unknown;
   };
 
   const handleGameClick = (game: Game) => {
@@ -39,14 +41,14 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
     if (!game) return;
 
     const playerNames = game.placements
-      .map(id => players[id]?.name || 'Desconocido')
+      .map(id => players[id]?.name || t.gameHistory.unknown)
       .join(', ');
 
     const confirmed = window.confirm(
-      `¿Estás seguro de que querés eliminar esta partida?\n\n` +
-      `Fecha: ${formatDate(game.date)}\n` +
-      `Jugadores: ${playerNames}\n\n` +
-      `Esto recalculará todos los ratings desde cero. Esta acción no se puede deshacer.`
+      `${t.gameHistory.confirmDeleteTitle}\n\n` +
+      `${t.gameHistory.confirmDeleteDate}: ${formatDate(game.date)}\n` +
+      `${t.gameHistory.confirmDeletePlayers}: ${playerNames}\n\n` +
+      `${t.gameHistory.confirmDeleteWarning}`
     );
 
     if (confirmed) {
@@ -75,7 +77,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
 
     // Validate generations
     if (editGenerations && (isNaN(generationsNum!) || generationsNum! < 1 || generationsNum! > 16)) {
-      alert('Las generaciones deben ser un número entre 1 y 16');
+      alert(t.gameHistory.generationsInvalid);
       return;
     }
 
@@ -101,16 +103,16 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
     <div className="tm-card overflow-hidden">
       <div className="tm-card-header px-6 py-5">
         <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-          Historial de Partidas
+          {t.gameHistory.title}
         </h2>
         <p className="mt-2 text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
-          {games.length} {games.length === 1 ? 'partida registrada' : 'partidas registradas'}
+          {games.length} {games.length === 1 ? t.gameHistory.gameRecorded : t.gameHistory.gamesRecorded}
         </p>
       </div>
 
       {games.length === 0 ? (
         <div className="px-6 py-12 text-center text-tm-oxide/70 dark:text-tm-sand/70">
-          Aún no hay partidas registradas. ¡Registrá tu primera partida para verla acá!
+          {t.gameHistory.noGamesYet} {t.gameHistory.recordFirstGame}
         </div>
       ) : (
         <div className="divide-y divide-tm-copper/20 dark:divide-white/10">
@@ -131,21 +133,21 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                           {formatDate(game.date)}
                         </span>
                         <span className="tm-chip">
-                          {game.placements.length} {game.placements.length === 1 ? 'jugador' : 'jugadores'}
+                          {game.placements.length} {game.placements.length === 1 ? t.gameHistory.player : t.gameHistory.players}
                         </span>
                         {game.twoPlayerGame && (
                           <span className="rounded-full border border-tm-copper/40 bg-tm-copper/15 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-tm-copper-dark dark:bg-tm-copper/25 dark:text-tm-glow">
-                            Sin ELO
+                            {t.gameHistory.noElo}
                           </span>
                         )}
                         {game.generations && (
                           <span className="tm-chip">
-                            {game.generations} gen
+                            {game.generations} {t.gameHistory.gen}
                           </span>
                         )}
                       </div>
                       <div className="text-sm text-tm-oxide/80 dark:text-tm-sand/80">
-                        Ganador:{' '}
+                        {t.gameHistory.winner}:{' '}
                         <span className="font-semibold text-tm-oxide dark:text-tm-glow">
                           {winner?.name}
                         </span>
@@ -167,7 +169,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                       <button
                         onClick={(e) => handleStartEdit(game, e)}
                         className="rounded-full border border-transparent p-2 text-tm-oxide hover:border-tm-oxide/40 hover:bg-tm-oxide/10 dark:text-tm-sand dark:hover:bg-white/10"
-                        title="Editar partida"
+                        title={t.gameHistory.editGame}
                       >
                         <svg
                           className="w-5 h-5"
@@ -186,7 +188,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                       <button
                         onClick={(e) => handleDeleteGame(game.id, e)}
                         className="rounded-full border border-transparent p-2 text-tm-copper hover:border-tm-copper/40 hover:bg-tm-copper/10 dark:text-tm-glow dark:hover:bg-white/10"
-                        title="Eliminar partida"
+                        title={t.gameHistory.deleteGame}
                       >
                         <svg
                           className="w-5 h-5"
@@ -219,7 +221,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                 {isExpanded && (
                   <div className="bg-white/70 px-6 py-5 dark:bg-tm-haze/70">
                     <h3 className="mb-3 text-sm font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-                      Clasificación Final
+                      {t.gameHistory.finalStandings}
                     </h3>
                     <div className="space-y-3">
                       {game.placements.map((playerId, index) => {
@@ -247,10 +249,10 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                               </div>
                               <div>
                                 <div className="font-semibold text-tm-oxide dark:text-tm-sand">
-                                  {player?.name || 'Desconocido'}
+                                  {player?.name || t.gameHistory.unknown}
                                 </div>
                                 <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                                  Rating después de la partida: {Math.round((player?.currentRating || 0))}
+                                  {t.gameHistory.ratingAfterGame}: {Math.round((player?.currentRating || 0))}
                                 </div>
                               </div>
                             </div>
@@ -275,14 +277,14 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                     {editingGame === game.id ? (
                       <div className="mt-5 border-t border-tm-copper/20 pt-4 dark:border-white/10">
                         <h3 className="mb-4 text-sm font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-                          Editar Partida
+                          {t.gameHistory.editGameTitle}
                         </h3>
 
                         <div className="space-y-4">
                           {/* Generations */}
                           <div>
                             <label className="mb-2 block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                              Generaciones (1-16, opcional)
+                              {t.gameHistory.generationsLabel}
                             </label>
                             <input
                               type="number"
@@ -290,7 +292,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                               max="16"
                               value={editGenerations}
                               onChange={(e) => setEditGenerations(e.target.value)}
-                              placeholder="Ej: 12"
+                              placeholder={t.gameHistory.generationsPlaceholder}
                               className="w-full rounded-lg border border-tm-copper/30 bg-white px-4 py-2 text-tm-oxide transition focus:border-tm-copper focus:outline-none focus:ring-2 focus:ring-tm-copper/20 dark:border-white/20 dark:bg-tm-haze dark:text-tm-sand dark:focus:border-tm-glow dark:focus:ring-tm-glow/20"
                             />
                           </div>
@@ -298,7 +300,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                           {/* Expansions */}
                           <div>
                             <label className="mb-3 block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                              Expansiones
+                              {t.gameHistory.expansionsLabel}
                             </label>
                             <div className="flex flex-wrap gap-2">
                               {AVAILABLE_EXPANSIONS.map(expansion => (
@@ -324,13 +326,13 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                               onClick={() => handleSaveEdit(game.id)}
                               className="flex-1 rounded-lg bg-tm-teal px-6 py-2.5 font-semibold text-white shadow-md transition hover:bg-tm-teal/90 dark:bg-tm-glow dark:text-tm-oxide dark:hover:bg-tm-glow/90"
                             >
-                              Guardar Cambios
+                              {t.gameHistory.saveChanges}
                             </button>
                             <button
                               onClick={handleCancelEdit}
                               className="flex-1 rounded-lg border border-tm-copper/40 bg-transparent px-6 py-2.5 font-semibold text-tm-oxide transition hover:bg-tm-copper/10 dark:border-white/20 dark:text-tm-sand dark:hover:bg-white/10"
                             >
-                              Cancelar
+                              {t.gameHistory.cancel}
                             </button>
                           </div>
                         </div>
@@ -341,7 +343,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                              ID de Partida:
+                              {t.gameHistory.gameId}:
                             </span>
                             <span className="ml-2 font-mono text-xs text-tm-oxide dark:text-tm-sand">
                               {game.id}
@@ -349,7 +351,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                           </div>
                           <div>
                             <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                              Jugadores:
+                              {t.gameHistory.playersLabel}:
                             </span>
                             <span className="ml-2 text-tm-oxide dark:text-tm-sand">
                               {game.placements.map(id => getPlayerName(id)).join(', ')}
@@ -358,7 +360,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                           {game.generations && (
                             <div>
                               <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                                Generaciones:
+                                {t.gameHistory.generationsInfo}:
                               </span>
                               <span className="ml-2 text-tm-oxide dark:text-tm-sand">
                                 {game.generations}
@@ -368,7 +370,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                           {game.expansions && game.expansions.length > 0 && (
                             <div>
                               <span className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-                                Expansiones:
+                                {t.gameHistory.expansionsInfo}:
                               </span>
                               <span className="ml-2 text-tm-oxide dark:text-tm-sand">
                                 {game.expansions.join(', ')}

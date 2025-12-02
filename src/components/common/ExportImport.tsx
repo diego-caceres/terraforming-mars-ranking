@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { exportData, importData } from '../../services/storageService';
+import { useI18n } from '../../i18n';
 
 interface ExportImportProps {
   onImportSuccess: () => void;
@@ -8,6 +9,7 @@ interface ExportImportProps {
 }
 
 export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthenticationRequired }: ExportImportProps) {
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -29,11 +31,11 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setSuccess('Data exported successfully!');
+      setSuccess(t.exportImport.exportSuccess);
       setError(null);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError('Failed to export data');
+      setError(t.exportImport.exportError);
       setSuccess(null);
     }
   };
@@ -53,12 +55,12 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
     try {
       const text = await file.text();
       importData(text);
-      setSuccess('Data imported successfully!');
+      setSuccess(t.exportImport.importSuccess);
       setError(null);
       setTimeout(() => setSuccess(null), 3000);
       onImportSuccess();
     } catch (err) {
-      setError('Failed to import data. Please check the file format.');
+      setError(t.exportImport.importError);
       setSuccess(null);
     }
 
@@ -71,7 +73,7 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
   return (
     <div className="tm-card p-6 space-y-4">
       <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-        Backup & Restore
+        {t.exportImport.title}
       </h3>
 
       {error && (
@@ -91,13 +93,13 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
           onClick={handleExport}
           className="flex-1 tm-button-primary justify-center"
         >
-          Export Data
+          {t.exportImport.exportData}
         </button>
         <button
           onClick={handleImport}
           className="flex-1 rounded-md border border-tm-copper/40 bg-white/75 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-tm-oxide transition-colors hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
         >
-          Import Data
+          {t.exportImport.importData}
         </button>
       </div>
 
@@ -110,7 +112,7 @@ export default function ExportImport({ onImportSuccess, isAuthenticated, onAuthe
       />
 
       <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-        Export your data to back it up, or import a previously exported file to restore your rankings.
+        {t.exportImport.description}
       </p>
     </div>
   );

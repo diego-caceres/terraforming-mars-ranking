@@ -5,6 +5,7 @@ import { getMonthlyRankings } from '../services/storageService';
 import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
 import { useRankings } from '../contexts/RankingsContext';
+import { useI18n, pluralize } from '../i18n';
 import MonthlyRankingSkeleton from './common/MonthlyRankingSkeleton';
 
 interface RankingsProps {
@@ -19,6 +20,7 @@ interface RankingsProps {
 type ViewMode = 'allTime' | 'monthly' | 'monthlyIndependent';
 
 export default function Rankings({ players, allPlayers, allGames, activeOnly, onPlayerClick, onToggleActiveFilter }: RankingsProps) {
+  const { t, language } = useI18n();
   const { getMonthlyIndependentRankings: getMonthlyIndependentRankingsFromContext } = useRankings();
   const [sortBy, setSortBy] = useState<'rating' | 'peakRating' | 'games' | 'winRate'>('rating');
   const [viewMode, setViewMode] = useState<ViewMode>('allTime');
@@ -176,9 +178,11 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
   };
 
   const getMonthName = (month: number): string => {
-    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    return months[month - 1];
+    const monthKeys = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ] as const;
+    return t.rankings.months[monthKeys[month - 1]];
   };
 
   return (
@@ -199,7 +203,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                 : 'border border-tm-copper/40 bg-white/80 text-tm-oxide dark:bg-tm-haze/80 dark:text-tm-sand hover:bg-white'
             }`}
           >
-            {activeOnly ? 'Mostrando Activos' : 'Mostrar Solo Activos'}
+            {activeOnly ? t.rankings.showingActive : t.rankings.showOnlyActive}
           </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -211,7 +215,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                 : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
-            Por Rating
+            {t.rankings.sortByRating}
           </button>
           <button
             onClick={() => setSortBy('peakRating')}
@@ -221,7 +225,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                 : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
-            Por Pico
+            {t.rankings.sortByPeak}
           </button>
           <button
             onClick={() => setSortBy('games')}
@@ -231,7 +235,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                 : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
-            Por Partidas
+            {t.rankings.sortByGames}
           </button>
           <button
             onClick={() => setSortBy('winRate')}
@@ -241,7 +245,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                 : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
             }`}
           >
-            Por % Victorias
+            {t.rankings.sortByWinRate}
           </button>
         </div>
 
@@ -258,7 +262,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                     : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
                 }`}
               >
-                Histórico
+                {t.rankings.allTimeView}
               </button>
               <button
                 onClick={() => setViewMode('monthly')}
@@ -268,7 +272,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                     : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
                 }`}
               >
-                Mensual Acumulado
+                {t.rankings.monthlyAccumulatedView}
               </button>
               <button
                 onClick={() => setViewMode('monthlyIndependent')}
@@ -278,7 +282,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                     : 'border border-tm-copper/40 bg-white/70 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand'
                 }`}
               >
-                Mensual Independiente
+                {t.rankings.monthlyIndependentView}
               </button>
             </div>
 
@@ -290,18 +294,18 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                   onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                   className="rounded-md border border-tm-copper/40 bg-white/90 px-3 py-1.5 text-sm text-tm-oxide dark:bg-tm-haze/90 dark:text-tm-sand"
                 >
-                  <option value={1}>Enero</option>
-                  <option value={2}>Febrero</option>
-                  <option value={3}>Marzo</option>
-                  <option value={4}>Abril</option>
-                  <option value={5}>Mayo</option>
-                  <option value={6}>Junio</option>
-                  <option value={7}>Julio</option>
-                  <option value={8}>Agosto</option>
-                  <option value={9}>Septiembre</option>
-                  <option value={10}>Octubre</option>
-                  <option value={11}>Noviembre</option>
-                  <option value={12}>Diciembre</option>
+                  <option value={1}>{t.rankings.months.january}</option>
+                  <option value={2}>{t.rankings.months.february}</option>
+                  <option value={3}>{t.rankings.months.march}</option>
+                  <option value={4}>{t.rankings.months.april}</option>
+                  <option value={5}>{t.rankings.months.may}</option>
+                  <option value={6}>{t.rankings.months.june}</option>
+                  <option value={7}>{t.rankings.months.july}</option>
+                  <option value={8}>{t.rankings.months.august}</option>
+                  <option value={9}>{t.rankings.months.september}</option>
+                  <option value={10}>{t.rankings.months.october}</option>
+                  <option value={11}>{t.rankings.months.november}</option>
+                  <option value={12}>{t.rankings.months.december}</option>
                 </select>
                 <select
                   value={selectedYear}
@@ -313,7 +317,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                   ))}
                 </select>
                 <span className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                  ({monthlyGamesCount} {monthlyGamesCount === 1 ? 'partida' : 'partidas'})
+                  ({monthlyGamesCount} {pluralize(monthlyGamesCount, language === 'es' ? 'partida' : 'game', language === 'es' ? 'partidas' : 'games')})
                 </span>
               </div>
             )}
@@ -322,12 +326,12 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
           {/* Explanation text for monthly modes */}
           {viewMode === 'monthly' && (
             <div className="mt-3 text-xs text-tm-oxide/60 dark:text-tm-sand/60 bg-tm-copper/5 dark:bg-white/5 rounded-md px-3 py-2">
-              💡 <strong>Mensual Acumulado:</strong> Muestra el Elo histórico de cada jugador al final del mes seleccionado (rating acumulado desde el inicio).
+              {t.rankings.monthlyAccumulatedExplanation}
             </div>
           )}
           {viewMode === 'monthlyIndependent' && (
             <div className="mt-3 text-xs text-tm-oxide/60 dark:text-tm-sand/60 bg-tm-copper/5 dark:bg-white/5 rounded-md px-3 py-2">
-              💡 <strong>Mensual Independiente:</strong> Todos los jugadores arrancan en 1500 y solo se consideran las partidas de este mes (K-factor: 32, umbral de confianza: 5 partidas).
+              {t.rankings.monthlyIndependentExplanation}
             </div>
           )}
         </div>
@@ -339,7 +343,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
         </div>
       ) : sortedPlayers.length === 0 ? (
         <div className="px-6 py-12 text-center text-tm-oxide/70 dark:text-tm-sand/70">
-          Aún no hay jugadores. ¡Agregá tu primer jugador para comenzar!
+          {t.rankings.noPlayersYet}
         </div>
       ) : (
         <div className="overflow-x-auto bg-white/60 dark:bg-transparent">
@@ -347,25 +351,25 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
             <thead className="bg-tm-copper/10 dark:bg-white/5">
               <tr>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  Posición
+                  {t.rankings.position}
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  Jugador
+                  {t.rankings.player}
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  Rating
+                  {t.rankings.rating}
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  Pico
+                  {t.rankings.peak}
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  Partidas
+                  {t.rankings.games}
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  % Victorias
+                  {t.rankings.winRate}
                 </th>
                 <th className="px-6 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-                  Último Cambio
+                  {t.rankings.lastChange}
                 </th>
               </tr>
             </thead>
@@ -401,7 +405,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                         </span>
                         {lowConfidence && (
                           <span className="tm-chip">
-                            Nuevo
+                            {t.common.new}
                           </span>
                         )}
                       </div>
@@ -446,10 +450,10 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
         <div className="border-t border-tm-copper/20 dark:border-white/10 pt-6 px-6 pb-6">
           <div className="mb-4">
             <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-              Rankings Mensuales Independientes
+              {t.rankings.monthlyIndependentRankings}
             </h3>
             <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
-              Todos los jugadores arrancan en 1500 cada mes. K-factor ajustado a 32 (vs. 40 histórico) para reducir la volatilidad en períodos cortos.
+              {t.rankings.monthlyRankingsDescription}
             </p>
           </div>
           <div className="space-y-4">
@@ -465,12 +469,12 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                         {getMonthName(monthData.month)} {monthData.year}
                       </h4>
                       <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
-                        {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
+                        {monthData.gamesCount} {pluralize(monthData.gamesCount, language === 'es' ? 'partida' : 'game', language === 'es' ? 'partidas' : 'games')}
                       </p>
                     </div>
                     {monthData.rankings.length === 0 ? (
                     <div className="px-4 py-8 text-center text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                      Sin partidas este mes
+                      {t.rankings.noGamesThisMonth}
                     </div>
                   ) : (
                     <div className="divide-y divide-tm-copper/10 dark:divide-white/5">
@@ -503,7 +507,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                               </div>
                             </div>
                             <div className="flex items-center gap-4 mt-1.5 ml-9 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                              <span>{player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida' : 'partidas'}</span>
+                              <span>{player.gamesPlayed} {pluralize(player.gamesPlayed, language === 'es' ? 'partida' : 'game', language === 'es' ? 'partidas' : 'games')}</span>
                               <span>•</span>
                               <span>{winRate.toFixed(1)}% victorias</span>
                               {lastChange !== null && (
@@ -542,12 +546,12 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                         {getMonthName(monthData.month)} {monthData.year}
                       </h4>
                       <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mt-1">
-                        {monthData.gamesCount} {monthData.gamesCount === 1 ? 'partida' : 'partidas'}
+                        {monthData.gamesCount} {pluralize(monthData.gamesCount, language === 'es' ? 'partida' : 'game', language === 'es' ? 'partidas' : 'games')}
                       </p>
                     </div>
                     {monthData.rankings.length === 0 ? (
                   <div className="px-4 py-8 text-center text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                    Sin partidas este mes
+                    {t.rankings.noGamesThisMonth}
                   </div>
                 ) : (
                   <div className="divide-y divide-tm-copper/10 dark:divide-white/5">
@@ -580,7 +584,7 @@ export default function Rankings({ players, allPlayers, allGames, activeOnly, on
                             </div>
                           </div>
                           <div className="flex items-center gap-4 mt-1.5 ml-9 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                            <span>{player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida' : 'partidas'}</span>
+                            <span>{player.gamesPlayed} {pluralize(player.gamesPlayed, language === 'es' ? 'partida' : 'game', language === 'es' ? 'partidas' : 'games')}</span>
                             <span>•</span>
                             <span>{winRate.toFixed(1)}% victorias</span>
                             {lastChange !== null && (

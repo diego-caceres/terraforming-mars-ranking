@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Player, PlayerColor } from '../types';
+import { useI18n } from '../i18n';
 
 interface PlayerEditProps {
   player: Player;
@@ -20,6 +21,7 @@ const COLOR_CLASSES: Record<PlayerColor, string> = {
 };
 
 export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps) {
+  const { t } = useI18n();
   const [name, setName] = useState(player.name);
   const [color, setColor] = useState<PlayerColor | ''>(player.color || '');
   const [saving, setSaving] = useState(false);
@@ -29,7 +31,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
     e.preventDefault();
 
     if (!name.trim()) {
-      setError('El nombre es requerido');
+      setError(t.playerEdit.nameRequired);
       return;
     }
 
@@ -42,7 +44,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
       });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar jugador');
+      setError(err instanceof Error ? err.message : t.playerEdit.updateError);
     } finally {
       setSaving(false);
     }
@@ -55,7 +57,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
         <div className="tm-card-header px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="tm-card-subtitle">Editar Jugador</p>
+              <p className="tm-card-subtitle">{t.playerEdit.title}</p>
               <h2 className="text-xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
                 {player.name}
               </h2>
@@ -83,7 +85,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
               htmlFor="player-name"
               className="mb-2 block text-sm font-semibold uppercase tracking-[0.2em] text-tm-oxide dark:text-tm-sand"
             >
-              Nombre
+              {t.playerEdit.nameLabel}
             </label>
             <input
               id="player-name"
@@ -98,7 +100,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
           {/* Color Field */}
           <div>
             <label className="mb-3 block text-sm font-semibold uppercase tracking-[0.2em] text-tm-oxide dark:text-tm-sand">
-              Color
+              {t.playerEdit.colorLabel}
             </label>
             <div className="grid grid-cols-4 gap-3">
               {/* No color option */}
@@ -112,7 +114,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
                 } bg-white/80 dark:bg-tm-haze/80`}
                 disabled={saving}
               >
-                <span className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">Sin color</span>
+                <span className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">{t.playerEdit.noColor}</span>
               </button>
 
               {/* Color options */}
@@ -139,7 +141,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
             </div>
             {color && (
               <p className="mt-2 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                Color seleccionado: {color}
+                {t.playerEdit.selectedColor}: {color}
               </p>
             )}
           </div>
@@ -152,14 +154,14 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
               className="tm-button-secondary flex-1"
               disabled={saving}
             >
-              Cancelar
+              {t.playerEdit.cancel}
             </button>
             <button
               type="submit"
               className="tm-button-primary flex-1"
               disabled={saving}
             >
-              {saving ? 'Guardando...' : 'Guardar'}
+              {saving ? t.playerEdit.saving : t.playerEdit.save}
             </button>
           </div>
         </form>

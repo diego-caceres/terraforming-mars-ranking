@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Player, PlayerColor } from '../types';
 import PlayerEdit from './PlayerEdit';
 import { getColorClasses } from '../utils/colorUtils';
+import { useI18n } from '../i18n';
 
 interface PlayerManagementProps {
   players: Record<string, Player>;
@@ -11,6 +12,7 @@ interface PlayerManagementProps {
 }
 
 export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, onUpdatePlayer }: PlayerManagementProps) {
+  const { t } = useI18n();
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -20,7 +22,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
     const trimmedName = newPlayerName.trim();
 
     if (!trimmedName) {
-      alert('Por favor ingresá un nombre de jugador');
+      alert(t.playerManagement.enterPlayerName);
       return;
     }
 
@@ -30,7 +32,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
     );
 
     if (existingPlayer) {
-      alert('Ya existe un jugador con este nombre');
+      alert(t.playerManagement.playerAlreadyExists);
       return;
     }
 
@@ -47,26 +49,26 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
   return (
     <div className="tm-card p-6 space-y-6">
       <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-        Gestión de Jugadores
+        {t.playerManagement.title}
       </h2>
 
       {showSuccess && (
         <div className="rounded-lg border border-tm-teal/40 bg-tm-teal/15 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-tm-teal dark:bg-tm-teal/20 dark:text-tm-glow">
-          ¡Jugador agregado exitosamente!
+          {t.playerManagement.playerAddedSuccess}
         </div>
       )}
 
       {/* Add Player Form */}
       <form onSubmit={handleSubmit} className="space-y-3">
         <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70">
-          Agregar Nuevo Jugador
+          {t.playerManagement.addNewPlayer}
         </label>
         <div className="flex gap-2">
           <input
             type="text"
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Ingresá el nombre del jugador"
+            placeholder={t.playerManagement.playerNamePlaceholder}
             className="flex-1 rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
             maxLength={50}
           />
@@ -74,23 +76,23 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
             type="submit"
             className="tm-button-primary"
           >
-            Agregar Jugador
+            {t.playerManagement.addPlayerButton}
           </button>
         </div>
         <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-          Los jugadores nuevos empiezan con un rating de 1500
+          {t.playerManagement.startingRatingInfo}
         </p>
       </form>
 
       {/* Player List */}
       <div className="space-y-3">
         <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-          Todos los Jugadores ({playerArray.length})
+          {t.playerManagement.allPlayers} ({playerArray.length})
         </h3>
 
         {playerArray.length === 0 ? (
           <p className="text-sm text-tm-oxide/60 dark:text-tm-sand/60">
-            Aún no hay jugadores. ¡Agregá tu primer jugador arriba!
+            {t.playerManagement.noPlayersYet} {t.playerManagement.addFirstPlayer}
           </p>
         ) : (
           <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
@@ -111,7 +113,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
                       {player.name}
                     </div>
                     <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 uppercase tracking-wide">
-                      {player.gamesPlayed} {player.gamesPlayed === 1 ? 'partida jugada' : 'partidas jugadas'}
+                      {player.gamesPlayed} {player.gamesPlayed === 1 ? t.playerManagement.gamePlayed : t.playerManagement.gamesPlayed}
                     </div>
                   </div>
                 </div>
@@ -121,7 +123,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
                       {Math.round(player.currentRating)}
                     </div>
                     <div className="text-[0.65rem] uppercase tracking-[0.2em] text-tm-oxide/60 dark:text-tm-sand/60">
-                      Rating
+                      {t.playerManagement.rating}
                     </div>
                   </div>
                   <button
@@ -131,7 +133,7 @@ export default function PlayerManagement({ players, onAddPlayer, onPlayerClick, 
                     }}
                     className="rounded-md border border-tm-copper/40 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-tm-oxide transition-all hover:bg-white hover:border-tm-copper dark:bg-tm-haze/80 dark:text-tm-sand dark:hover:bg-tm-haze/70"
                   >
-                    Editar
+                    {t.playerManagement.editButton}
                   </button>
                 </div>
               </div>

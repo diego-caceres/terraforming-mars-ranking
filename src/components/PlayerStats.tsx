@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import type { Player, Game } from '../types';
 import { getPlayerStats } from '../services/storageService';
 import { getColorClasses } from '../utils/colorUtils';
+import { useI18n, formatDate } from '../i18n';
 
 interface PlayerStatsProps {
   playerId: string;
@@ -31,6 +32,7 @@ interface StatsData {
 }
 
 export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
+  const { t, language } = useI18n();
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
         const data = await getPlayerStats(playerId);
         setStats(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al cargar estadísticas');
+        setError(err instanceof Error ? err.message : t.playerStats.loadingError);
         console.error('Error loading player stats:', err);
       } finally {
         setLoading(false);
@@ -69,9 +71,9 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
         <div className="tm-card p-8">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error || 'No se encontraron estadísticas'}</p>
+          <p className="text-red-600 dark:text-red-400 mb-4">{error || t.playerStats.statsNotFound}</p>
           <button onClick={onClose} className="tm-button-primary">
-            Cerrar
+            {t.playerStats.close}
           </button>
         </div>
       </div>
@@ -92,9 +94,9 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
   const yAxisMin = Math.floor(minRating - padding);
   const yAxisMax = Math.ceil(maxRating + padding);
 
-  const formatDate = (timestamp: number | null) => {
-    if (!timestamp) return 'Nunca';
-    return new Date(timestamp).toLocaleDateString();
+  const formatDateHelper = (timestamp: number | null) => {
+    if (!timestamp) return t.playerStats.never;
+    return formatDate(new Date(timestamp), language);
   };
 
   // Get the earliest date between createdAt and first game
@@ -114,7 +116,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
         {/* Header */}
         <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5 bg-tm-sand/95 dark:bg-tm-haze/95 backdrop-blur-sm">
           <div>
-            <p className="tm-card-subtitle">Expediente de Piloto</p>
+            <p className="tm-card-subtitle">{t.playerStats.pilotRecord}</p>
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-2xl font-heading uppercase tracking-[0.35em] text-tm-oxide dark:text-tm-glow">
                 {stats.player.name}
@@ -122,9 +124,9 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
               {stats.player.color && (
                 <span
                   className="inline-flex items-center gap-2 rounded-full border border-tm-copper/30 bg-white/80 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-tm-oxide dark:border-white/20 dark:bg-tm-haze/70 dark:text-tm-sand"
-                  title={`Color: ${stats.player.color}`}
+                  title={`${t.playerStats.color}: ${stats.player.color}`}
                 >
-                  Color
+                  {t.playerStats.color}
                   <span
                     className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(stats.player.color)}`}
                     aria-hidden="true"
@@ -133,7 +135,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
               )}
             </div>
             <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-              Miembro desde {formatDate(getMemberSinceDate())}
+              {t.playerStats.memberSince} {formatDateHelper(getMemberSinceDate())}
             </p>
           </div>
           <button
@@ -149,7 +151,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
               <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
-                Rating Actual
+                {t.playerStats.currentRating}
               </div>
               <div className="mt-2 text-3xl font-bold text-tm-copper dark:text-tm-glow">
                 {Math.round(stats.player.currentRating)}
@@ -157,7 +159,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
             </div>
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
               <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
-                Rating Pico
+                {t.playerStats.peakRating}
               </div>
               <div className="mt-2 text-3xl font-bold text-tm-copper/80 dark:text-tm-glow/80">
                 {Math.round(stats.player.peakRating || stats.player.currentRating)}
@@ -165,7 +167,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
             </div>
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
               <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
-                Partidas Jugadas
+                {t.playerStats.gamesPlayed}
               </div>
               <div className="mt-2 text-3xl font-bold text-tm-oxide dark:text-tm-sand">
                 {stats.player.gamesPlayed}
@@ -173,7 +175,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
             </div>
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
               <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
-                % de Victorias
+                {t.playerStats.winRate}
               </div>
               <div className="mt-2 text-3xl font-bold text-tm-teal">
                 {stats.winRate.toFixed(1)}%
@@ -181,7 +183,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
             </div>
             <div className="rounded-lg border border-tm-copper/30 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
               <div className="text-xs uppercase tracking-[0.25em] text-tm-oxide/60 dark:text-tm-sand/60">
-                Posición Promedio
+                {t.playerStats.averagePlacement}
               </div>
               <div className="mt-2 text-3xl font-bold text-tm-copper-dark">
                 {stats.averagePlacement.toFixed(1)}
@@ -193,7 +195,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {chartData.length > 0 && (
             <div>
               <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-                Historial de Rating
+                {t.playerStats.ratingHistory}
               </h3>
               <div className="rounded-lg border border-tm-copper/20 bg-white/85 p-4 dark:border-white/10 dark:bg-tm-haze/80">
                 <ResponsiveContainer width="100%" height={250}>
@@ -201,7 +203,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(216,108,41,0.25)" />
                     <XAxis
                       dataKey="game"
-                      label={{ value: 'Número de Partida', position: 'insideBottom', offset: -5 }}
+                      label={{ value: t.playerStats.gameNumber, position: 'insideBottom', offset: -5 }}
                       stroke="#8c6b4f"
                     />
                     <YAxis
@@ -234,29 +236,29 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {stats.headToHead.length > 0 && (
             <div>
               <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-                Récords Cara a Cara
+                {t.playerStats.headToHeadRecords}
               </h3>
               <div className="overflow-hidden rounded-lg border border-tm-copper/20 bg-white/85 dark:border-white/10 dark:bg-tm-haze/80">
                 <table className="w-full">
                   <thead className="bg-tm-copper/10 text-[0.65rem] uppercase tracking-[0.3em] text-tm-oxide/70 dark:bg-white/5 dark:text-tm-sand/70">
                     <tr>
                       <th className="px-4 py-3 text-left">
-                        Oponente
+                        {t.playerStats.opponent}
                       </th>
                       <th className="px-4 py-3 text-center">
-                        Partidas
+                        {t.playerStats.games}
                       </th>
                       <th className="px-4 py-3 text-center">
-                        Victorias
+                        {t.playerStats.wins}
                       </th>
                       <th className="px-4 py-3 text-center">
-                        Derrotas
+                        {t.playerStats.losses}
                       </th>
                       <th className="px-4 py-3 text-center">
-                        Empates
+                        {t.playerStats.ties}
                       </th>
                       <th className="px-4 py-3 text-center">
-                        % Victorias
+                        {t.playerStats.winRate}
                       </th>
                     </tr>
                   </thead>
@@ -299,7 +301,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
           {stats.recentGames.length > 0 && (
             <div>
               <h3 className="mb-3 text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-                Partidas Recientes
+                {t.playerStats.recentGames}
               </h3>
               <div className="space-y-2">
                 {stats.recentGames.map(game => {
@@ -314,11 +316,11 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-tm-oxide dark:text-tm-sand">
-                            Posición #{placement + 1} de {game.placements.length}
+                            {t.playerStats.position} #{placement + 1} {t.playerStats.positionOf} {game.placements.length}
                           </span>
                           {game.twoPlayerGame && (
                             <span className="text-[0.6rem] rounded-full border border-tm-copper/40 bg-tm-copper/15 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-tm-copper-dark dark:bg-tm-copper/25 dark:text-tm-glow">
-                              Sin ELO
+                              {t.playerStats.noElo}
                             </span>
                           )}
                         </div>
@@ -335,12 +337,12 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                             {game.twoPlayerGame ? '±0' : `${ratingChange > 0 ? '+' : ''}${ratingChange}`}
                           </span>
                           <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                            {formatDate(game.date)}
+                            {formatDateHelper(game.date)}
                           </div>
                         </div>
                       </div>
                       <div className="text-xs text-tm-oxide/70 dark:text-tm-sand/70">
-                        Jugadores: {game.placements.map(id => stats.playerNames[id] || 'Desconocido').join(', ')}
+                        {t.playerStats.players}: {game.placements.map(id => stats.playerNames[id] || t.playerStats.unknown).join(', ')}
                       </div>
                     </div>
                   );

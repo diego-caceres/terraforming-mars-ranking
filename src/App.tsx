@@ -5,6 +5,7 @@ import PlayerManagement from './components/PlayerManagement';
 import PlayerStats from './components/PlayerStats';
 import GameHistory from './components/GameHistory';
 import DarkModeToggle from './components/common/DarkModeToggle';
+import LanguageToggle from './components/common/LanguageToggle';
 import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
 import StatsOverview from './components/common/StatsOverview';
@@ -12,6 +13,7 @@ import StatsOverviewSkeleton from './components/common/StatsOverviewSkeleton';
 import RankingsTableSkeleton from './components/common/RankingsTableSkeleton';
 import { RankingsProvider } from './contexts/RankingsContext';
 import { useDarkMode } from './hooks/useDarkMode';
+import { useI18n } from './i18n';
 import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/storageService';
 import { invalidateMonthlyRankingsCache, invalidateMonthlyRankingsCacheForMonth, checkAndMigrateCacheVersion } from './utils/storageUtils';
 import { requiresAuthentication } from './services/authService';
@@ -20,6 +22,7 @@ import type { Player, Game, PlayerColor } from './types';
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
 
 function App() {
+  const { t } = useI18n();
   const [darkMode, setDarkMode] = useDarkMode();
   const [activeTab, setActiveTab] = useState<Tab>('rankings');
   const [players, setPlayers] = useState<Record<string, Player>>({});
@@ -55,7 +58,7 @@ function App() {
       setRankings(rankedPlayers);
       setGames(allGames);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar datos');
+      setError(err instanceof Error ? err.message : t.app.errorLoading);
       console.error('Error loading data:', err);
     } finally {
       if (!silent) {
@@ -253,25 +256,26 @@ function App() {
         <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-3 sm:py-4 md:py-5">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4">
             <div>
-              <p className="tm-card-subtitle text-white/70">Liga Los del Cuadrito</p>
+              <p className="tm-card-subtitle text-white/70">{t.app.leagueName}</p>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading tracking-[0.3em] md:tracking-[0.4em] uppercase">
-                Terraforming Mars
+                {t.app.appTitle}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageToggle />
               {isAuthenticated ? (
                 <button
                   onClick={() => setIsAuthenticated(false)}
                   className="tm-button-secondary border-white/40 bg-white/10 hover:bg-white/20"
                 >
-                  Cerrar sesión
+                  {t.app.logout}
                 </button>
               ) : (
                 <button
                   onClick={() => setShowLoginModal(true)}
                   className="tm-button-secondary border-white/30 bg-white/15 hover:bg-white/25"
                 >
-                  Iniciar sesión
+                  {t.app.login}
                 </button>
               )}
               <DarkModeToggle darkMode={darkMode} onToggle={handleToggleDarkMode} />
@@ -291,7 +295,7 @@ function App() {
               aria-controls="main-navigation"
               className="inline-flex items-center gap-2 rounded-md border border-tm-copper/30 bg-white/60 px-3 py-2 text-xs font-heading uppercase tracking-[0.25em] text-tm-oxide/80 transition hover:bg-white/80 dark:border-white/20 dark:bg-tm-haze/70 dark:text-tm-sand/70 dark:hover:bg-tm-haze"
             >
-              <span>Menú</span>
+              <span>{t.app.menu}</span>
               <svg
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
@@ -325,7 +329,7 @@ function App() {
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
-              Rankings
+              {t.app.tabRankings}
             </button>
             <button
               onClick={() => handleTabChange('addGame')}
@@ -335,7 +339,7 @@ function App() {
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
-              Registrar partida
+              {t.app.tabAddGame}
             </button>
             <button
               onClick={() => handleTabChange('players')}
@@ -345,7 +349,7 @@ function App() {
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
-              Jugadores
+              {t.app.tabPlayers}
             </button>
             <button
               onClick={() => handleTabChange('history')}
@@ -355,7 +359,7 @@ function App() {
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
-              Historial
+              {t.app.tabHistory}
             </button>
             <button
               onClick={() => handleTabChange('settings')}
@@ -365,7 +369,7 @@ function App() {
                   : 'border-transparent text-tm-oxide/70 dark:text-tm-sand/60 hover:text-tm-copper dark:hover:text-tm-glow'
               }`}
             >
-              Configuración
+              {t.app.tabSettings}
             </button>
           </div>
         </div>
@@ -382,13 +386,13 @@ function App() {
         {error && (
           <div className="tm-card p-6 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <p className="text-red-800 dark:text-red-200">
-              <strong>Error:</strong> {error}
+              <strong>{t.common.error}:</strong> {error}
             </p>
             <button
               onClick={() => loadData()}
               className="mt-4 tm-button-primary"
             >
-              Reintentar
+              {t.app.retry}
             </button>
           </div>
         )}
@@ -441,37 +445,34 @@ function App() {
 
             <div className="tm-card p-6 space-y-4">
               <h3 className="text-lg font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-                Acerca del Sistema Elo
+                {t.app.aboutEloTitle}
               </h3>
               <div className="space-y-3 text-sm text-tm-oxide/80 dark:text-tm-sand/80">
                 <div>
-                  <h4 className="font-semibold text-tm-oxide dark:text-tm-sand mb-2">Características principales:</h4>
+                  <h4 className="font-semibold text-tm-oxide dark:text-tm-sand mb-2">{t.settings.mainFeatures}:</h4>
                   <ul className="ml-4 space-y-1 marker:text-tm-copper list-disc">
-                    <li><strong>K-Factor: 40</strong> - Determina qué tan rápido cambian los ratings después de cada partida</li>
-                    <li><strong>Rating Inicial: 1500</strong> - Todos los jugadores nuevos empiezan con este puntaje</li>
-                    <li><strong>Umbral de Confianza: 10 partidas</strong> - Los jugadores con menos de 10 partidas se marcan como "Nuevo"</li>
+                    <li><strong>{t.settings.kFactor}</strong> - {t.settings.kFactorDescription}</li>
+                    <li><strong>{t.settings.initialRating}</strong> - {t.settings.initialRatingDescription}</li>
+                    <li><strong>{t.settings.confidenceThreshold}</strong> - {t.settings.confidenceThresholdDescription}</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-tm-oxide dark:text-tm-sand mb-2">Cómo funciona:</h4>
+                  <h4 className="font-semibold text-tm-oxide dark:text-tm-sand mb-2">{t.settings.howItWorks}:</h4>
                   <p className="mb-2">
-                    En este sistema multijugador, cada jugador es comparado contra <strong>todos los demás jugadores</strong> en la partida.
-                    Para cada par de jugadores:
+                    {t.settings.howItWorksIntro}
                   </p>
                   <ol className="list-decimal list-inside space-y-1 ml-2">
-                    <li>Se calcula la <strong>probabilidad esperada</strong> de ganar basada en la diferencia de ratings</li>
-                    <li>Se determina el <strong>resultado real</strong>: 1.0 = victoria, 0.5 = empate, 0.0 = derrota</li>
-                    <li>El cambio de rating se calcula como: <code className="rounded bg-tm-copper/20 px-1 text-xs font-mono uppercase tracking-wide dark:bg-tm-haze/80">Cambio = K × (Resultado Real - Resultado Esperado)</code></li>
-                    <li>Se suman todos los cambios de cada comparación para obtener el cambio total del jugador</li>
+                    <li>{t.settings.step1}</li>
+                    <li>{t.settings.step2}</li>
+                    <li>{t.settings.step3}</li>
+                    <li>{t.settings.step4}</li>
                   </ol>
                 </div>
 
                 <div className="rounded-md border border-tm-copper/30 bg-tm-copper/10 p-4 text-sm text-tm-oxide dark:border-white/10 dark:bg-tm-haze/70 dark:text-tm-sand">
                   <p className="font-semibold text-tm-oxide dark:text-tm-sand">
-                    <strong>Ejemplo:</strong> Si terminás 1° en una partida de 4 jugadores, tu rating aumenta más si venciste
-                    a jugadores con rating alto que si venciste a jugadores con rating bajo. El sistema recompensa ganarle a
-                    oponentes fuertes y penaliza perder contra oponentes débiles.
+                    <strong>{t.settings.exampleTitle}:</strong> {t.settings.exampleText}
                   </p>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import type { DropResult } from '@hello-pangea/dnd';
 import type { Player, Game } from '../types';
 import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
+import { useI18n, getRelativeTimeString } from '../i18n';
 
 interface AddGameProps {
   players: Record<string, Player>;
@@ -15,6 +16,7 @@ interface AddGameProps {
 const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares', 'Pathfinders', 'Colonies', 'The Moon'];
 
 export default function AddGame({ players, games, onSubmit, onUndo }: AddGameProps) {
+  const { t, language } = useI18n();
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [placements, setPlacements] = useState<string[]>([]);
   const [gameDate, setGameDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -49,7 +51,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (placements.length < 2) {
-      alert('Por favor seleccioná al menos 2 jugadores');
+      alert(t.addGame.selectAtLeastTwoPlayers);
       return;
     }
 
@@ -98,22 +100,11 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   const recentGames = games.slice(0, 5);
 
   const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Hoy';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Ayer';
-    } else {
-      return date.toLocaleDateString('es-UY', { day: 'numeric', month: 'short' });
-    }
+    return getRelativeTimeString(timestamp, language);
   };
 
   const getPlayerName = (playerId: string) => {
-    return players[playerId]?.name || 'Desconocido';
+    return players[playerId]?.name || t.addGame.unknown;
   };
 
   return (
@@ -122,7 +113,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
       {recentGames.length > 0 && (
         <div className="tm-card p-4">
           <h3 className="text-sm font-heading uppercase tracking-[0.25em] text-tm-oxide/70 dark:text-tm-sand/70 mb-3">
-            Últimas Partidas Agregadas
+            {t.addGame.recentGamesTitle}
           </h3>
           <div className="space-y-2">
             {recentGames.map((game) => (
@@ -138,7 +129,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                     <span className="font-semibold text-tm-copper">{getPlayerName(game.placements[0])}</span>
                     {game.placements.length > 1 && (
                       <span className="text-tm-oxide/60 dark:text-tm-sand/60">
-                        {' vs '}
+                        {t.addGame.vs}
                         {game.placements.slice(1).map((id, idx) => (
                           <span key={id}>
                             {idx > 0 && ', '}
@@ -170,21 +161,21 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
       {/* Add Game Form */}
       <div className="tm-card p-6 space-y-6">
         <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
-          Registrar Resultado de Partida
+          {t.addGame.title}
         </h2>
 
       {showSuccess && (
         <div className="rounded-lg border border-tm-teal/40 bg-tm-teal/15 px-4 py-3 text-sm text-tm-teal dark:bg-tm-teal/20 dark:text-tm-glow">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <span className="font-semibold uppercase tracking-wide">
-              ¡Partida registrada exitosamente! Los ratings han sido actualizados.
+              {t.addGame.successMessage}
             </span>
             {canUndo && (
               <button
                 onClick={handleUndo}
                 className="tm-button-secondary md:ml-4"
               >
-                Deshacer Última Partida
+                {t.addGame.undoButton}
               </button>
             )}
           </div>
@@ -195,7 +186,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
         {/* Game Date */}
         <div className="mb-6">
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
-            Fecha de la Partida
+            {t.addGame.gameDateLabel}
           </label>
           <input
             type="date"
@@ -205,14 +196,14 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
             className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
           />
           <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-            Seleccioná la fecha en que se jugó esta partida
+            {t.addGame.gameDateHelper}
           </p>
         </div>
 
         {/* Generations */}
         <div className="mb-6">
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
-            Número de Generaciones (Opcional)
+            {t.addGame.generationsLabel}
           </label>
           <input
             type="number"
@@ -220,18 +211,18 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
             max="16"
             value={generations}
             onChange={(e) => setGenerations(e.target.value)}
-            placeholder="Ingresá un número (1-16)"
+            placeholder={t.addGame.generationsPlaceholder}
             className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
           />
           <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-            ¿Cuántas generaciones se jugaron en esta partida?
+            {t.addGame.generationsHelper}
           </p>
         </div>
 
         {/* Expansions */}
         <div className="mb-6">
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
-            Expansiones Usadas (Opcional)
+            {t.addGame.expansionsLabel}
           </label>
           <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
             {AVAILABLE_EXPANSIONS.map(expansion => (
@@ -254,13 +245,13 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
         {/* Player Selection */}
         <div className="mb-6">
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
-            Seleccionar Jugadores
+            {t.addGame.selectPlayersLabel}
           </label>
           {availablePlayers.length === 0 ? (
             <p className="text-sm text-tm-oxide/60 dark:text-tm-sand/60">
               {playerArray.length === 0
-                ? 'No hay jugadores disponibles. Por favor agregá jugadores primero.'
-                : 'Todos los jugadores han sido seleccionados.'}
+                ? t.addGame.noPlayersAvailable
+                : t.addGame.allPlayersSelected}
             </p>
           ) : (
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
@@ -288,15 +279,15 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
         {placements.length > 0 && (
           <div className="mb-6">
             <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
-              Orden de Posiciones (Arrastrá para reordenar)
+              {t.addGame.placementOrderLabel}
             </label>
             <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 mb-3">
-              Arriba = 1er lugar, Abajo = Último lugar
+              {t.addGame.placementOrderHelper}
             </p>
             {placements.length === 2 && (
               <div className="mb-3 rounded-lg border border-tm-copper/30 bg-tm-copper/10 px-3 py-2 dark:bg-tm-copper/20">
                 <p className="text-xs text-tm-oxide dark:text-tm-sand">
-                  <strong>Nota:</strong> Las partidas de 2 jugadores se registran para tracking de actividad pero no afectan el rating ELO.
+                  {t.addGame.twoPlayerNote}
                 </p>
               </div>
             )}
@@ -342,7 +333,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                                   {player?.name}
                                 </div>
                                 <div className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                                  Rating Actual: {Math.round(player?.currentRating || 0)}
+                                  {t.addGame.currentRating}: {Math.round(player?.currentRating || 0)}
                                 </div>
                               </div>
                               <button
@@ -350,7 +341,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
                                 onClick={() => handleRemovePlayer(playerId)}
                                 className="text-xs font-semibold uppercase tracking-wide text-tm-copper-dark hover:text-tm-copper"
                               >
-                                Borrar
+                                {t.addGame.remove}
                               </button>
                             </div>
                           )}
@@ -374,7 +365,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
               placements.length < 2 ? 'cursor-not-allowed opacity-60' : ''
             }`}
           >
-            Agregar Partida
+            {t.addGame.addGameButton}
           </button>
           {placements.length > 0 && (
             <button
@@ -382,7 +373,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
               onClick={handleReset}
               className="rounded-md border border-tm-copper/40 bg-white/75 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-tm-oxide transition-colors hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60"
             >
-              Resetear
+              {t.addGame.resetButton}
             </button>
           )}
         </div>

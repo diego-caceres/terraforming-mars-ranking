@@ -1,5 +1,6 @@
 import type { Game, Player } from '../../types';
 import { getColorClasses } from '../../utils/colorUtils';
+import { useI18n, getRelativeTimeString } from '../../i18n';
 
 interface StatsOverviewProps {
   games: Game[];
@@ -10,32 +11,13 @@ interface StatsOverviewProps {
 const USE_LOCAL_STORAGE = import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
 
 export default function StatsOverview({ games, players }: StatsOverviewProps) {
+  const { t, language } = useI18n();
   const totalGames = games.length;
 
   // Get last game info
   const lastGame = games.length > 0 ? games[0] : null; // Games are in reverse chronological order
   const lastGameWinner = lastGame ? players[lastGame.placements[0]] : null;
-  const lastGameDate = lastGame ? new Date(lastGame.date) : null;
-
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-      return 'Hoy';
-    } else if (diffDays === 1) {
-      return 'Ayer';
-    } else if (diffDays < 7) {
-      return `Hace ${diffDays} días`;
-    } else {
-      return date.toLocaleDateString('es-UY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    }
-  };
+  const lastGameDate = lastGame ? lastGame.date : null;
 
   // Calculate most active player
   const mostActivePlayer = Object.values(players).reduce((max, player) => {
@@ -54,7 +36,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-            Total Partidas
+            {t.statsOverview.totalGames}
           </p>
           <div className="grid grid-cols-[1fr_auto] items-center gap-4">
             <p className="text-3xl font-bold text-tm-copper dark:text-tm-glow">
@@ -83,7 +65,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-            Última Partida
+            {t.statsOverview.lastGame}
           </p>
           <div className="grid grid-cols-[1fr_auto] items-start gap-4">
             <div className="min-w-0">
@@ -91,12 +73,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                 <div className="space-y-1.5">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                      {lastGameWinner?.name || 'Desconocido'}
+                      {lastGameWinner?.name || t.statsOverview.noPlayers}
                     </p>
                     {lastGameWinner?.color && (
                       <span
                         className="inline-flex items-center gap-1 rounded-full"
-                        title={`Color: ${lastGameWinner.color}`}
+                        title={`${t.statsOverview.color}: ${lastGameWinner.color}`}
                       >
                         <span
                           className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(lastGameWinner.color)}`}
@@ -106,12 +88,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                     )}
                   </div>
                   <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                    {lastGameDate && formatDate(lastGameDate)}
+                    {lastGameDate && getRelativeTimeString(lastGameDate, language)}
                   </p>
                 </div>
               ) : (
                 <p className="text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
-                  Aún no hay partidas
+                  {t.statsOverview.noGamesYet}
                 </p>
               )}
             </div>
@@ -138,7 +120,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-            Mejor Rating
+            {t.statsOverview.topRated}
           </p>
           <div className="grid grid-cols-[1fr_auto] items-start gap-4">
             <div className="min-w-0">
@@ -151,7 +133,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                     {topPlayer.color && (
                       <span
                         className="inline-flex items-center gap-1 rounded-full"
-                        title={`Color: ${topPlayer.color}`}
+                        title={`${t.statsOverview.color}: ${topPlayer.color}`}
                       >
                         <span
                           className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(topPlayer.color)}`}
@@ -161,12 +143,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                     )}
                   </div>
                   <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                    {Math.round(topPlayer.currentRating)} puntos
+                    {Math.round(topPlayer.currentRating)} {t.statsOverview.points}
                   </p>
                 </div>
               ) : (
                 <p className="text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
-                  Sin jugadores
+                  {t.statsOverview.noPlayers}
                 </p>
               )}
             </div>
@@ -193,7 +175,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
       <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-            Más Activo
+            {t.statsOverview.mostActive}
           </p>
           <div className="grid grid-cols-[1fr_auto] items-start gap-4">
             <div className="min-w-0">
@@ -206,7 +188,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                     {mostActivePlayer.color && (
                       <span
                         className="inline-flex items-center gap-1 rounded-full"
-                        title={`Color: ${mostActivePlayer.color}`}
+                        title={`${t.statsOverview.color}: ${mostActivePlayer.color}`}
                       >
                         <span
                           className={`h-2.5 w-2.5 rounded-full border-2 ${getColorClasses(mostActivePlayer.color)}`}
@@ -216,12 +198,12 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
                     )}
                   </div>
                   <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                    {mostActivePlayer.gamesPlayed} {mostActivePlayer.gamesPlayed === 1 ? 'partida' : 'partidas'}
+                    {mostActivePlayer.gamesPlayed} {mostActivePlayer.gamesPlayed === 1 ? t.statsOverview.game : t.statsOverview.games}
                   </p>
                 </div>
               ) : (
                 <p className="text-lg font-medium text-tm-oxide/60 dark:text-tm-sand/60">
-                  Sin jugadores
+                  {t.statsOverview.noPlayers}
                 </p>
               )}
             </div>
@@ -249,15 +231,15 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
         <div className="col-span-2 rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80 lg:col-span-1">
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-              Espectadora Premium
+              {t.statsOverview.premiumSpectator}
             </p>
             <div className="grid grid-cols-[1fr_auto] items-start gap-4">
               <div className="min-w-0 space-y-1">
                 <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                  Anto
+                  {t.statsOverview.spectatorName}
                 </p>
                 <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                  Animando desde las gradas
+                  {t.statsOverview.spectatorDescription}
                 </p>
               </div>
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/15 text-tm-copper">

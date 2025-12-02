@@ -4,7 +4,7 @@
 
 Aplicación web para trackear rankings del juego de mesa "Terraforming Mars" usando un sistema Elo multijugador. Desarrollada con React + TypeScript + Vite, con almacenamiento en Upstash Redis. Diseñada específicamente para Terraforming Mars pero adaptable a cualquier juego de mesa.
 
-**Usuario objetivo:** Jugadores uruguayos (interfaz en español con conjugación "vos")
+**Usuario objetivo:** Jugadores uruguayos (interfaz bilingüe español/inglés con conjugación "vos" para español)
 
 ## Stack Tecnológico
 
@@ -65,6 +65,7 @@ Aplicación web para trackear rankings del juego de mesa "Terraforming Mars" usa
    - Export/Import de datos JSON
    - Explicación completa del sistema Elo en español
    - Dark mode toggle
+   - Language toggle (Español/English)
 
 ## Estructura de Archivos
 
@@ -93,6 +94,7 @@ src/
 │   ├── GameHistory.tsx        # Historial de todas las partidas
 │   └── common/
 │       ├── DarkModeToggle.tsx
+│       ├── LanguageToggle.tsx # Toggle de idioma (ES/EN)
 │       ├── ExportImport.tsx
 │       └── StatsOverview.tsx  # Cards de stats en página principal
 ├── services/
@@ -100,6 +102,16 @@ src/
 │   └── apiService.ts          # Llamadas a API (reemplaza storageService)
 ├── hooks/
 │   └── useDarkMode.ts         # Hook para dark mode
+├── i18n/                      # Sistema de internacionalización
+│   ├── types.ts               # Tipos TypeScript para traducciones
+│   ├── translations/          # Archivos de traducción por idioma
+│   │   ├── es.ts              # Español
+│   │   ├── en.ts              # English
+│   │   └── index.ts           # Exports y utilities
+│   ├── I18nContext.tsx        # Context provider y hook
+│   ├── utils.ts               # Helpers (dates, numbers, plurals)
+│   ├── index.ts               # Main export
+│   └── README.md              # Documentación completa de i18n
 ├── types/
 │   └── index.ts               # Definiciones TypeScript
 └── App.tsx                    # Componente principal con tabs
@@ -167,11 +179,33 @@ interface Game {
 2. **Type imports:** Usar `import type` para imports de tipos con verbatimModuleSyntax
 3. **Tailwind v4 incompatibilidad:** Downgrade a Tailwind v3 con PostCSS estándar
 
-## Traducciones al Español
+## Sistema de Internacionalización (i18n)
 
-✅ Toda la interfaz está en español (dialecto uruguayo con "vos")
-✅ Fechas, números y plurales manejados correctamente
-✅ Mensajes de confirmación y alertas traducidos
+✅ **Soporte bilingüe:** Español (ES) e Inglés (EN)
+✅ **Type-safe:** Completamente tipado con TypeScript
+✅ **Lightweight:** ~2KB (minified + gzipped), sin dependencias externas
+✅ **Auto-detección:** Detecta idioma del navegador automáticamente
+✅ **Persistencia:** Guarda preferencia en localStorage
+✅ **Utilities incluidas:**
+  - `formatDate()`: Formatea fechas según idioma (es-UY / en-US)
+  - `formatNumber()`: Formatea números según locale
+  - `pluralize()`: Maneja pluralización simple
+  - `interpolate()`: Interpola variables en strings
+  - `getRelativeTimeString()`: "Hoy", "Ayer", "Hace X días" / "Today", "Yesterday", "X days ago"
+
+**Uso básico:**
+```tsx
+import { useI18n } from './i18n';
+
+function MyComponent() {
+  const { t, language, setLanguage } = useI18n();
+  return <button>{t.common.save}</button>;
+}
+```
+
+**Documentación completa:** Ver `/src/i18n/README.md`
+
+**Estado actual:** Infraestructura implementada, traducción de textos pendiente
 
 ## Decisiones de Diseño
 
