@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { exportData, importData } from '../../services/apiService';
+import { exportData, importData } from '../../services/storageService';
 
 interface ExportImportProps {
   onImportSuccess: () => void;

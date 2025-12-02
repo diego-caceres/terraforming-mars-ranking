@@ -12,8 +12,9 @@ import StatsOverviewSkeleton from './components/common/StatsOverviewSkeleton';
 import RankingsTableSkeleton from './components/common/RankingsTableSkeleton';
 import { RankingsProvider } from './contexts/RankingsContext';
 import { useDarkMode } from './hooks/useDarkMode';
-import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/apiService';
+import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/storageService';
 import { invalidateMonthlyRankingsCache } from './utils/storageUtils';
+import { requiresAuthentication } from './services/authService';
 import type { Player, Game, PlayerColor } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -66,6 +67,13 @@ function App() {
   useEffect(() => {
     loadData();
   }, [activeOnly]);
+
+  // Auto-authenticate when using localStorage
+  useEffect(() => {
+    if (!requiresAuthentication()) {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const handleAddPlayer = async (name: string, color?: PlayerColor) => {
     if (!isAuthenticated) {

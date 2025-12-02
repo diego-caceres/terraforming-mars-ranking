@@ -20,10 +20,14 @@ A modern web application for tracking board game rankings using a multiplayer El
 
 ## Getting Started
 
+This app supports two storage modes:
+1. **localStorage Mode**: No backend needed, data stored in browser (perfect for testing/personal use)
+2. **Redis Mode**: Full backend with Upstash Redis (for production/shared data)
+
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm
-- Upstash account (for Redis database - free tier available)
+- Upstash account (only for Redis mode - free tier available)
 
 ### Installation & Setup
 
@@ -34,7 +38,42 @@ A modern web application for tracking board game rankings using a multiplayer El
 npm install
 ```
 
-#### 2. Configure Upstash Redis
+#### 2. Choose Your Storage Mode
+
+##### Option A: localStorage Mode (Simpler, No Backend)
+
+Perfect for testing, development, or personal use where you don't need to share data across devices.
+
+1. Create `.env.local` file:
+
+```bash
+cp .env.example .env.local
+```
+
+2. Configure for localStorage:
+
+```env
+VITE_USE_LOCAL_STORAGE=true
+```
+
+3. Run Development Server:
+
+```bash
+# Run frontend only
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+**Limitations:**
+- Data is NOT shared between devices/browsers
+- Data cleared if browser cache is cleared
+- No authentication required
+- Monthly rankings feature unavailable
+
+##### Option B: Redis Mode (Production Setup)
+
+For production deployments with shared data across users.
 
 1. Create a Redis database in Upstash:
    - Go to https://console.upstash.com/
@@ -52,15 +91,16 @@ npm install
 cp .env.example .env.local
 ```
 
-3. Add your Upstash credentials to `.env.local`:
+3. Add your configuration to `.env.local`:
 
 ```env
+VITE_USE_LOCAL_STORAGE=false
 UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url_here
 UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token_here
 VITE_AUTH_PASSWORD=your_admin_password_here
 ```
 
-#### 3. Run Development Server
+4. Run Development Server:
 
 ```bash
 # Run with Vercel Dev (compiles API routes + runs frontend)
@@ -71,7 +111,12 @@ The app will be available at `http://localhost:3000`
 
 **Note:** Use `vercel dev` directly, NOT `npm run dev`
 
-#### 4. Deploy to Production
+#### 3. Deploy to Production
+
+##### Deploy localStorage Mode:
+Simply build and deploy the frontend. Set `VITE_USE_LOCAL_STORAGE=true` in your deployment environment.
+
+##### Deploy Redis Mode:
 
 ```bash
 # Push to connected Git repo (auto-deploys)

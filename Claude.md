@@ -175,14 +175,17 @@ interface Game {
 
 ## Decisiones de Diseño
 
-1. **Arquitectura:** Single-user con Upstash Redis (sin autenticación de usuarios, solo password admin)
-2. **Storage:** Upstash Redis con schema normalizado (players:all, players:{id}, games:all, games:{id})
-3. **Eliminación de partidas:** Recalcula desde cero en lugar de "revertir" cambios para garantizar consistencia matemática
-4. **Filtro de activos:** Jugadores activos = al menos 1 partida en últimos 30 días
-5. **Ordenamiento de historial:** Por fecha de juego (no por fecha de ingreso al sistema)
-6. **Validación de jugadores:** No permite nombres duplicados (case-insensitive)
-7. **Undo temporal:** 10 segundos para deshacer última partida
-8. **Conexión requerida:** La app requiere internet para funcionar (no hay fallback offline)
+1. **Arquitectura:** Single-user con dos modos de storage: Upstash Redis (producción) o localStorage (test/dev)
+2. **Storage:**
+   - **Producción:** Upstash Redis con schema normalizado (players:all, players:{id}, games:all, games:{id})
+   - **Test/Dev:** localStorage del navegador (sin necesidad de backend)
+3. **Autenticación:** Requerida solo en modo Redis; modo localStorage no requiere password
+4. **Eliminación de partidas:** Recalcula desde cero en lugar de "revertir" cambios para garantizar consistencia matemática
+5. **Filtro de activos:** Jugadores activos = al menos 1 partida en últimos 30 días
+6. **Ordenamiento de historial:** Por fecha de juego (no por fecha de ingreso al sistema)
+7. **Validación de jugadores:** No permite nombres duplicados (case-insensitive)
+8. **Undo temporal:** 10 segundos para deshacer última partida
+9. **Modo localStorage:** Los datos se guardan localmente en el navegador (no compartidos entre dispositivos)
 
 ## Scripts de Migración
 
@@ -213,11 +216,34 @@ Ver documentación completa en `/scripts/README.md`
 - [ ] Comparación de 2+ jugadores lado a lado
 - [ ] Multi-usuario con autenticación (Clerk, NextAuth)
 - [ ] PWA para uso móvil offline
-- [ ] Implementar import de datos (actualmente solo export funciona)
+- [x] Implementar import de datos (funciona en modo localStorage)
 
-## Deployment en Vercel
+## Deployment
 
-### Setup Inicial
+### Modo 1: Servidor de Pruebas con localStorage (Sin Redis)
+
+Para un servidor de pruebas donde cada usuario tenga sus propios datos locales:
+
+1. **Configurar Variables de Entorno:**
+   ```bash
+   VITE_USE_LOCAL_STORAGE=true
+   ```
+
+2. **Deploy:**
+   - No se necesita Upstash Redis
+   - No se necesita VITE_AUTH_PASSWORD
+   - Los datos se guardan en el navegador de cada usuario
+   - Ideal para pruebas, desarrollo o uso personal sin compartir datos
+
+3. **Limitaciones del modo localStorage:**
+   - Los datos NO se comparten entre dispositivos
+   - Los datos se pierden si se limpia el caché del navegador
+   - No hay rankings mensuales (requiere API)
+   - No funciona la funcionalidad de import (solo export)
+
+### Modo 2: Producción con Upstash Redis
+
+Para un servidor de producción con datos compartidos:
 
 1. **Crear Database en Upstash:**
    - Ir a https://console.upstash.com/
@@ -230,6 +256,7 @@ Ver documentación completa en `/scripts/README.md`
 2. **Configurar Variables de Entorno:**
    - En Vercel Dashboard → Settings → Environment Variables
    - Agregar:
+     - `VITE_USE_LOCAL_STORAGE=false`
      - `UPSTASH_REDIS_REST_URL`
      - `UPSTASH_REDIS_REST_TOKEN`
      - `VITE_AUTH_PASSWORD` (para acciones admin)
@@ -242,6 +269,8 @@ Ver documentación completa en `/scripts/README.md`
 
 ### Desarrollo Local
 
+#### Opción A: Modo localStorage (más simple, sin Redis)
+
 1. **Instalar dependencias:**
    ```bash
    npm install
@@ -250,7 +279,36 @@ Ver documentación completa en `/scripts/README.md`
 2. **Configurar `.env.local`:**
    ```bash
    cp .env.example .env.local
-   # Editar .env.local con tus credenciales de Upstash Redis
+   # Editar .env.local y setear:
+   VITE_USE_LOCAL_STORAGE=true
+   ```
+
+3. **Ejecutar en desarrollo:**
+   ```bash
+   npm run dev          # Solo frontend en http://localhost:5173
+   ```
+
+4. **Build para producción:**
+   ```bash
+   npm run build        # Build para producción
+   npm run preview      # Preview del build
+   ```
+
+#### Opción B: Modo Redis (con backend API)
+
+1. **Instalar dependencias:**
+   ```bash
+   npm install
+   ```
+
+2. **Configurar `.env.local`:**
+   ```bash
+   cp .env.example .env.local
+   # Editar .env.local con:
+   VITE_USE_LOCAL_STORAGE=false
+   VITE_AUTH_PASSWORD=tu_password
+   UPSTASH_REDIS_REST_URL=tu_url_de_upstash
+   UPSTASH_REDIS_REST_TOKEN=tu_token_de_upstash
    ```
 
 3. **Ejecutar en desarrollo:**

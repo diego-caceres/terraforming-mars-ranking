@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Player, Game } from '../types';
-import { getPlayerStats } from '../services/apiService';
+import { getPlayerStats } from '../services/storageService';
 import { getColorClasses } from '../utils/colorUtils';
 
 interface PlayerStatsProps {

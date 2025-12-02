@@ -6,6 +6,9 @@ interface StatsOverviewProps {
   players: Record<string, Player>;
 }
 
+// Check if using localStorage mode
+const USE_LOCAL_STORAGE = import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
+
 export default function StatsOverview({ games, players }: StatsOverviewProps) {
   const totalGames = games.length;
 
@@ -46,7 +49,7 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
 
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+    <div className={`mb-6 grid grid-cols-2 gap-4 md:grid-cols-2 ${USE_LOCAL_STORAGE ? 'lg:grid-cols-4' : 'lg:grid-cols-4 xl:grid-cols-5'}`}>
       {/* Total Games */}
       <div className="rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80">
         <div className="space-y-3">
@@ -241,39 +244,41 @@ export default function StatsOverview({ games, players }: StatsOverviewProps) {
         </div>
       </div>
 
-      {/* Espectadora Premium */}
-      <div className="col-span-2 rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80 lg:col-span-1">
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
-            Espectadora Premium
-          </p>
-          <div className="grid grid-cols-[1fr_auto] items-start gap-4">
-            <div className="min-w-0 space-y-1">
-              <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
-                Anto
-              </p>
-              <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-                Animando desde las gradas
-              </p>
-            </div>
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/15 text-tm-copper">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5.121 17.804A6.002 6.002 0 0112 14c1.657 0 3.156.672 4.243 1.757M15 11a3 3 0 10-6 0 3 3 0 006 0zM19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2M19 8h-2m-1-3v2a2 2 0 002 2h2"
-                />
-              </svg>
+      {/* Espectadora Premium - Only show in Redis mode */}
+      {!USE_LOCAL_STORAGE && (
+        <div className="col-span-2 rounded-lg border border-tm-copper/25 bg-white/85 p-6 shadow-sm dark:border-white/10 dark:bg-tm-haze/80 lg:col-span-1">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-tm-oxide/60 dark:text-tm-sand/60">
+              Espectadora Premium
+            </p>
+            <div className="grid grid-cols-[1fr_auto] items-start gap-4">
+              <div className="min-w-0 space-y-1">
+                <p className="truncate text-lg font-bold text-tm-oxide dark:text-tm-sand">
+                  Anto
+                </p>
+                <p className="text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                  Animando desde las gradas
+                </p>
+              </div>
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-tm-copper/30 bg-tm-copper/15 text-tm-copper">
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5.121 17.804A6.002 6.002 0 0112 14c1.657 0 3.156.672 4.243 1.757M15 11a3 3 0 10-6 0 3 3 0 006 0zM19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2M19 8h-2m-1-3v2a2 2 0 002 2h2"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

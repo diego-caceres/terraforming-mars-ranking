@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Player, Game } from '../types';
 import { hasLowConfidence } from '../services/eloCalculator';
-import { getMonthlyRankings } from '../services/apiService';
+import { getMonthlyRankings } from '../services/storageService';
 import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
 import { useRankings } from '../contexts/RankingsContext';
