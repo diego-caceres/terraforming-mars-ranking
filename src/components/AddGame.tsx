@@ -19,7 +19,11 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   const { t, language } = useI18n();
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [placements, setPlacements] = useState<string[]>([]);
-  const [gameDate, setGameDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [gameDate, setGameDate] = useState<string>(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+  });
   const [selectedExpansions, setSelectedExpansions] = useState<string[]>([]);
   const [generations, setGenerations] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -66,7 +70,9 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
     onSubmit(placements, timestamp, selectedExpansions, generationsNum);
     setSelectedPlayers([]);
     setPlacements([]);
-    setGameDate(new Date().toISOString().split('T')[0]);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    setGameDate(yesterday.toISOString().split('T')[0]);
     setSelectedExpansions([]);
     setGenerations('');
     setShowSuccess(true);
@@ -188,13 +194,48 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
             {t.addGame.gameDateLabel}
           </label>
-          <input
-            type="date"
-            value={gameDate}
-            onChange={(e) => setGameDate(e.target.value)}
-            max={new Date().toISOString().split('T')[0]}
-            className="w-full rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
-          />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const yesterday = new Date();
+                  yesterday.setDate(yesterday.getDate() - 1);
+                  setGameDate(yesterday.toISOString().split('T')[0]);
+                }}
+                className={`rounded-md px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-all ${
+                  (() => {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    return gameDate === yesterdayStr
+                      ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg border-2 border-tm-copper'
+                      : 'border-2 border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60';
+                  })()
+                }`}
+              >
+                {language === 'es' ? 'Ayer' : 'Yesterday'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setGameDate(new Date().toISOString().split('T')[0])}
+                className={`rounded-md px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-all ${
+                  gameDate === new Date().toISOString().split('T')[0]
+                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg border-2 border-tm-copper'
+                    : 'border-2 border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60'
+                }`}
+              >
+                {language === 'es' ? 'Hoy' : 'Today'}
+              </button>
+            </div>
+            <input
+              type="date"
+              value={gameDate}
+              onChange={(e) => setGameDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+              className="flex-1 rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
+            />
+          </div>
           <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
             {t.addGame.gameDateHelper}
           </p>
