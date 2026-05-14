@@ -4,10 +4,9 @@ import AddGame from './components/AddGame';
 import PlayerManagement from './components/PlayerManagement';
 import PlayerStats from './components/PlayerStats';
 import GameHistory from './components/GameHistory';
-import DarkModeToggle from './components/common/DarkModeToggle';
-import LanguageToggle from './components/common/LanguageToggle';
 import ExportImport from './components/common/ExportImport';
 import LoginModal from './components/common/LoginModal';
+import UserMenu from './components/common/UserMenu';
 import StatsOverview from './components/common/StatsOverview';
 import StatsOverviewSkeleton from './components/common/StatsOverviewSkeleton';
 import RankingsTableSkeleton from './components/common/RankingsTableSkeleton';
@@ -16,7 +15,7 @@ import { useDarkMode } from './hooks/useDarkMode';
 import { useI18n } from './i18n';
 import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/storageService';
 import { invalidateMonthlyRankingsCache, invalidateMonthlyRankingsCacheForMonth, checkAndMigrateCacheVersion } from './utils/storageUtils';
-import { requiresAuthentication, saveSession, isSessionValid, clearSession } from './services/authService';
+import { requiresAuthentication, saveSession, isSessionValid, clearSession, getUserName } from './services/authService';
 import type { Player, Game, PlayerColor } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -32,6 +31,8 @@ function App() {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginNameOnly, setLoginNameOnly] = useState(false);
+  const [userName, setUserName] = useState(() => getUserName());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -254,7 +255,7 @@ function App() {
 
   return (
     <RankingsProvider>
-      <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80 backdrop-blur-xl">
+      <div className="min-h-screen bg-white/70 dark:bg-tm-haze/80">
       {/* Header */}
       <header className="bg-gradient-to-r from-tm-copper via-tm-copper-dark to-tm-oxide text-white shadow-lg border-b border-white/10">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-3 sm:py-4 md:py-5">
@@ -266,23 +267,15 @@ function App() {
               </h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <LanguageToggle />
-              {isAuthenticated ? (
-                <button
-                  onClick={() => { clearSession(); setIsAuthenticated(false); }}
-                  className="tm-button-secondary border-white/40 bg-white/10 hover:bg-white/20"
-                >
-                  {t.app.logout}
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className="tm-button-secondary border-white/30 bg-white/15 hover:bg-white/25"
-                >
-                  {t.app.login}
-                </button>
-              )}
-              <DarkModeToggle darkMode={darkMode} onToggle={handleToggleDarkMode} />
+              <UserMenu
+                userName={userName}
+                players={players}
+                darkMode={darkMode}
+                onToggleDarkMode={handleToggleDarkMode}
+                isAuthenticated={isAuthenticated}
+                onLogin={() => { setLoginNameOnly(false); setShowLoginModal(true); }}
+                onLogout={() => { clearSession(); setIsAuthenticated(false); }}
+              />
             </div>
           </div>
         </div>
@@ -493,17 +486,23 @@ function App() {
       {/* Login Modal */}
       <LoginModal
         isOpen={showLoginModal}
+        nameOnly={loginNameOnly}
         onLogin={async () => {
-          saveSession();
-          setIsAuthenticated(true);
+          if (!loginNameOnly) {
+            saveSession();
+            setIsAuthenticated(true);
+          }
           setShowLoginModal(false);
-          if (pendingAction) {
+          setLoginNameOnly(false);
+          setUserName(getUserName());
+          if (!loginNameOnly && pendingAction) {
             await pendingAction();
             setPendingAction(null);
           }
         }}
         onClose={() => {
           setShowLoginModal(false);
+          setLoginNameOnly(false);
           setPendingAction(null);
         }}
       />

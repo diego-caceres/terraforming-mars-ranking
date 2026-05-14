@@ -51,7 +51,8 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm">
+      <div className="flex min-h-full items-center justify-center p-4">
       <div className="tm-card relative w-full max-w-md">
         {/* Header */}
         <div className="tm-card-header px-6 py-5">
@@ -165,6 +166,7 @@ export default function PlayerEdit({ player, onSave, onClose }: PlayerEditProps)
             </button>
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

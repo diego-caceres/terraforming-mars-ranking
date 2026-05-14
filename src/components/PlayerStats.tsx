@@ -57,10 +57,12 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-        <div className="tm-card p-8">
-          <div className="flex justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tm-copper"></div>
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm">
+        <div className="flex min-h-full items-center justify-center p-4">
+          <div className="tm-card p-8">
+            <div className="flex justify-center items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tm-copper"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -69,12 +71,14 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
 
   if (error || !stats) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-        <div className="tm-card p-8">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error || t.playerStats.statsNotFound}</p>
-          <button onClick={onClose} className="tm-button-primary">
-            {t.playerStats.close}
-          </button>
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm">
+        <div className="flex min-h-full items-center justify-center p-4">
+          <div className="tm-card p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">{error || t.playerStats.statsNotFound}</p>
+            <button onClick={onClose} className="tm-button-primary">
+              {t.playerStats.close}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -111,7 +115,8 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm">
+      <div className="flex min-h-full items-center justify-center p-4">
       <div className="tm-card relative w-full max-h-[90vh] max-w-4xl overflow-y-auto">
         {/* Header */}
         <div className="tm-card-header sticky top-0 z-10 flex items-start justify-between gap-4 px-6 py-5 bg-tm-sand/95 dark:bg-tm-haze/95 backdrop-blur-sm">
@@ -351,6 +356,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

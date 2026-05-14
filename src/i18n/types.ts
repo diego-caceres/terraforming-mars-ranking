@@ -216,6 +216,16 @@ export interface Translations {
 
     // Settings section
     aboutEloTitle: string; // "About the Elo System"
+
+    // User menu / greeting
+    greeting: string; // "Hola" / "Hello"
+    languageLabel: string; // "Idioma" / "Language"
+    darkMode: string; // "Modo oscuro" / "Dark mode"
+    lightMode: string; // "Modo claro" / "Light mode"
+    setName: string; // "Ingresar nombre" / "Set name"
+    changeName: string; // "Cambiar nombre" / "Change name"
+    nameLabel: string; // "Nombre" / "Name"
+    namePlaceholder: string; // "Tu nombre" / "Your name"
   };
 
   playerManagement: {

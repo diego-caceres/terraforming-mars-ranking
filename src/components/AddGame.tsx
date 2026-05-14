@@ -135,11 +135,12 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
       {/* Game Result Modal */}
       {gameSummary && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
           onClick={() => setGameSummary(null)}
         >
+          <div className="flex min-h-full items-center justify-center p-4">
           <div
-            className="tm-card w-full max-w-sm mx-4 p-6 space-y-4"
+            className="tm-card w-full max-w-sm p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-heading uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-glow text-center">
@@ -191,6 +192,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
             >
               {t.common.close}
             </button>
+          </div>
           </div>
         </div>
       )}

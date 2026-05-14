@@ -213,6 +213,16 @@ export const en: Translations = {
 
     // Settings section
     aboutEloTitle: 'About the Elo System',
+
+    // User menu / greeting
+    greeting: 'Hello',
+    languageLabel: 'Language',
+    darkMode: 'Dark mode',
+    lightMode: 'Light mode',
+    setName: 'Set name',
+    changeName: 'Change name',
+    nameLabel: 'Name',
+    namePlaceholder: 'Your name',
   },
 
   playerManagement: {
