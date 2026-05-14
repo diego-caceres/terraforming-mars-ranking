@@ -8,14 +8,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       // Get all players
       const playerIds = (await kv.smembers(KEYS.PLAYERS_ALL) as string[]) || [];
-      const players: Player[] = [];
-
-      for (const id of playerIds) {
-        const player = await kv.get<Player>(KEYS.PLAYER(id));
-        if (player) {
-          players.push(player);
-        }
-      }
+      const fetched = await Promise.all(playerIds.map(id => kv.get<Player>(KEYS.PLAYER(id))));
+      const players = fetched.filter(Boolean) as Player[];
 
       return res.status(200).json({ players });
     }
@@ -30,11 +24,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Check for duplicate names (case-insensitive)
       const playerIds = (await kv.smembers(KEYS.PLAYERS_ALL) as string[]) || [];
-      for (const id of playerIds) {
-        const existingPlayer = await kv.get<Player>(KEYS.PLAYER(id));
-        if (existingPlayer && existingPlayer.name.toLowerCase() === name.trim().toLowerCase()) {
-          return res.status(400).json({ error: 'Ya existe un jugador con ese nombre' });
-        }
+      const existingPlayers = await Promise.all(playerIds.map(id => kv.get<Player>(KEYS.PLAYER(id))));
+      const duplicate = existingPlayers.some(p => p && p.name.toLowerCase() === name.trim().toLowerCase());
+      if (duplicate) {
+        return res.status(400).json({ error: 'Ya existe un jugador con ese nombre' });
       }
 
       const startingRating = getStartingRating();

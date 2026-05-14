@@ -71,3 +71,4 @@ dist-ssr
 data/
 .vercel
 .env*.local
+Features.txt

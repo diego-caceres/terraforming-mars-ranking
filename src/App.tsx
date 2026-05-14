@@ -16,7 +16,7 @@ import { useDarkMode } from './hooks/useDarkMode';
 import { useI18n } from './i18n';
 import { getRankings, getAllPlayers, addPlayer, updatePlayer, recordGame, getAllGames, deleteLastGame, deleteGameById, updateGameMetadata } from './services/storageService';
 import { invalidateMonthlyRankingsCache, invalidateMonthlyRankingsCacheForMonth, checkAndMigrateCacheVersion } from './utils/storageUtils';
-import { requiresAuthentication } from './services/authService';
+import { requiresAuthentication, saveSession, isSessionValid, clearSession } from './services/authService';
 import type { Player, Game, PlayerColor } from './types';
 
 type Tab = 'rankings' | 'addGame' | 'players' | 'history' | 'settings';
@@ -76,9 +76,9 @@ function App() {
     loadData();
   }, [activeOnly]);
 
-  // Auto-authenticate when using localStorage
+  // Auto-authenticate when using localStorage or when a valid session exists
   useEffect(() => {
-    if (!requiresAuthentication()) {
+    if (!requiresAuthentication() || isSessionValid()) {
       setIsAuthenticated(true);
     }
   }, []);
@@ -125,7 +125,7 @@ function App() {
     }
   };
 
-  const handleRecordGame = async (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => {
+  const handleRecordGame = async (placements: string[], gameDate: number, expansions: string[], generations: number | undefined): Promise<{ game: Game; players: Record<string, Player> } | null> => {
     // Extract year and month from the game date to invalidate specific cache
     // Use UTC to match the monthly rankings calculation logic
     const gameDateTime = new Date(gameDate);
@@ -144,15 +144,17 @@ function App() {
         }
       });
       setShowLoginModal(true);
-      return;
+      return null;
     }
     try {
-      await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
+      const result = await recordGame({ playerIds: placements, placements, expansions, generations }, gameDate);
       // Invalidate cache for the specific month of the game
       invalidateMonthlyRankingsCacheForMonth(gameYear, gameMonth);
       await loadData(true); // Silent reload
+      return result;
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al registrar partida');
+      return null;
     }
   };
 
@@ -185,7 +187,8 @@ function App() {
         try {
           await deleteGameById(gameId);
           invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
-          await loadData();
+          setGames(prev => prev.filter(g => g.id !== gameId));
+          await loadData(true);
         } catch (err) {
           alert(err instanceof Error ? err.message : 'Error al eliminar partida');
         }
@@ -196,7 +199,8 @@ function App() {
     try {
       await deleteGameById(gameId);
       invalidateMonthlyRankingsCache(); // Invalidate cache after mutation
-      await loadData();
+      setGames(prev => prev.filter(g => g.id !== gameId)); // immediate removal
+      await loadData(true); // silent reload to sync updated ratings
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar partida');
     }
@@ -265,7 +269,7 @@ function App() {
               <LanguageToggle />
               {isAuthenticated ? (
                 <button
-                  onClick={() => setIsAuthenticated(false)}
+                  onClick={() => { clearSession(); setIsAuthenticated(false); }}
                   className="tm-button-secondary border-white/40 bg-white/10 hover:bg-white/20"
                 >
                   {t.app.logout}
@@ -490,6 +494,7 @@ function App() {
       <LoginModal
         isOpen={showLoginModal}
         onLogin={async () => {
+          saveSession();
           setIsAuthenticated(true);
           setShowLoginModal(false);
           if (pendingAction) {

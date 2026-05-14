@@ -22,14 +22,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Get all games for this player
     const gameIds = (await kv.zrange(KEYS.GAMES_ALL, 0, -1, { rev: true }) as string[]) || [];
-    const playerGames: Game[] = [];
-
-    for (const gameId of gameIds) {
-      const game = await kv.get<Game>(KEYS.GAME(String(gameId)));
-      if (game && game.placements.includes(id)) {
-        playerGames.push(game);
-      }
-    }
+    const fetchedGames = await Promise.all(gameIds.map(gid => kv.get<Game>(KEYS.GAME(String(gid)))));
+    const playerGames = (fetchedGames.filter(Boolean) as Game[]).filter(g => g.placements.includes(id));
 
     // Calculate stats
     let totalPlacement = 0;
@@ -52,13 +46,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // Fetch player names
+    const allPlayerIdArray = Array.from(allPlayerIds);
+    const fetchedNames = await Promise.all(allPlayerIdArray.map(pid => kv.get<Player>(KEYS.PLAYER(pid))));
     const playerNames: Record<string, string> = {};
-    for (const playerId of allPlayerIds) {
-      const p = await kv.get<Player>(KEYS.PLAYER(playerId));
-      if (p) {
-        playerNames[playerId] = p.name;
-      }
-    }
+    fetchedNames.forEach((p, i) => { if (p) playerNames[allPlayerIdArray[i]] = p.name; });
 
     // Calculate head-to-head records
     const headToHead: Record<string, { wins: number; losses: number; ties: number; gamesPlayed: number }> = {};

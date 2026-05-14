@@ -119,6 +119,13 @@ export interface Translations {
     selectAtLeastTwoPlayers: string;
   };
 
+  gameResultModal: {
+    title: string;
+    ratingChange: string;
+    newRating: string;
+    twoPlayerNote: string;
+  };
+
   playerStats: {
     // Loading/Error states
     loadingError: string;
@@ -306,6 +313,9 @@ export interface Translations {
     playersLabel: string; // "Players:"
     generationsInfo: string; // "Generations:"
     expansionsInfo: string; // "Expansions:"
+
+    // Pagination
+    showMore: string; // "Show More"
   };
 
   exportImport: {

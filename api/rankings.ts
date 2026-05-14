@@ -15,14 +15,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Get all players
     const playerIds = (await kv.smembers(KEYS.PLAYERS_ALL) as string[]) || [];
-    const players: Player[] = [];
-
-    for (const id of playerIds) {
-      const player = await kv.get<Player>(KEYS.PLAYER(id));
-      if (player) {
-        players.push(player);
-      }
-    }
+    const fetched = await Promise.all(playerIds.map(id => kv.get<Player>(KEYS.PLAYER(id))));
+    const players = fetched.filter(Boolean) as Player[];
 
     // Filter out players with no games
     let filteredPlayers = players.filter(player => player.gamesPlayed > 0);

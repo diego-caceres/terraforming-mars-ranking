@@ -68,28 +68,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Get all games sorted by date (ascending)
       const gameIds = (await kv.zrange(KEYS.GAMES_ALL, 0, -1) as string[]) || [];
-      const allGames: Game[] = [];
-
-      for (const gameId of gameIds) {
-        const g = await kv.get<Game>(KEYS.GAME(String(gameId)));
-        if (g) {
-          allGames.push(g);
-        }
-      }
-
-      // Filter out the deleted game
-      const remainingGames = allGames.filter(g => g.id !== id);
+      const fetchedGames = await Promise.all(gameIds.map(gid => kv.get<Game>(KEYS.GAME(String(gid)))));
+      const remainingGames = (fetchedGames.filter(Boolean) as Game[]).filter(g => g.id !== id);
 
       // Get all players and reset their stats
       const playerIds = (await kv.smembers(KEYS.PLAYERS_ALL) as string[]) || [];
+      const fetchedPlayers = await Promise.all(playerIds.map(pid => kv.get<Player>(KEYS.PLAYER(pid))));
       const players: Record<string, Player> = {};
-
-      for (const playerId of playerIds) {
-        const player = await kv.get<Player>(KEYS.PLAYER(playerId));
+      const startingRating = getStartingRating();
+      for (const player of fetchedPlayers) {
         if (player) {
-          // Reset to initial state
-          const startingRating = getStartingRating();
-          players[playerId] = {
+          players[player.id] = {
             ...player,
             currentRating: startingRating,
             peakRating: startingRating,
@@ -110,14 +99,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         Object.assign(players, updatedPlayers);
       }
 
-      // Save all updated players
-      for (const playerId in players) {
-        await kv.set(KEYS.PLAYER(playerId), players[playerId]);
-      }
-
-      // Delete the game
-      await kv.del(KEYS.GAME(id));
-      await kv.zrem(KEYS.GAMES_ALL, id);
+      // Save all updated players, delete the game — all in parallel
+      await Promise.all([
+        ...Object.keys(players).map(pid => kv.set(KEYS.PLAYER(pid), players[pid])),
+        kv.del(KEYS.GAME(id)),
+        kv.zrem(KEYS.GAMES_ALL, id),
+      ]);
 
       return res.status(200).json({
         message: 'Partida eliminada y ratings recalculados',

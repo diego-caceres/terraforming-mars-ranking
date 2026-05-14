@@ -22,29 +22,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Última partida no encontrada' });
     }
 
-    // Get all games sorted by date (ascending)
-    const allGameIds = (await kv.zrange(KEYS.GAMES_ALL, 0, -1) as string[]) || [];
-    const allGames: Game[] = [];
+    // Fetch all games and all players in parallel
+    const [allGameIds, playerIds] = await Promise.all([
+      kv.zrange(KEYS.GAMES_ALL, 0, -1) as Promise<string[]>,
+      kv.smembers(KEYS.PLAYERS_ALL) as Promise<string[]>,
+    ]);
 
-    for (const gameId of allGameIds) {
-      const g = await kv.get<Game>(KEYS.GAME(String(gameId)));
-      if (g) {
-        allGames.push(g);
-      }
-    }
+    const [fetchedGames, fetchedPlayers] = await Promise.all([
+      Promise.all((allGameIds || []).map(gid => kv.get<Game>(KEYS.GAME(String(gid))))),
+      Promise.all((playerIds || []).map(pid => kv.get<Player>(KEYS.PLAYER(pid)))),
+    ]);
 
-    // Filter out the last game
-    const remainingGames = allGames.filter(g => g.id !== lastGameId);
+    const remainingGames = (fetchedGames.filter(Boolean) as Game[]).filter(g => g.id !== lastGameId);
 
-    // Get all players and reset their stats
-    const playerIds = (await kv.smembers(KEYS.PLAYERS_ALL) as string[]) || [];
     const players: Record<string, Player> = {};
-
-    for (const playerId of playerIds) {
-      const player = await kv.get<Player>(KEYS.PLAYER(playerId));
+    const startingRating = getStartingRating();
+    for (const player of fetchedPlayers) {
       if (player) {
-        const startingRating = getStartingRating();
-        players[playerId] = {
+        players[player.id] = {
           ...player,
           currentRating: startingRating,
           peakRating: startingRating,
@@ -55,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Replay all remaining games
+    // Replay all remaining games (must be sequential — each depends on prior ratings)
     for (const g of remainingGames) {
       const ratingChanges = calculateEloChanges(g.placements, players);
       const gameWithChanges = { ...g, ratingChanges };
@@ -63,14 +58,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       Object.assign(players, updatedPlayers);
     }
 
-    // Save all updated players
-    for (const playerId in players) {
-      await kv.set(KEYS.PLAYER(playerId), players[playerId]);
-    }
-
-    // Delete the last game
-    await kv.del(KEYS.GAME(lastGameId));
-    await kv.zrem(KEYS.GAMES_ALL, lastGameId);
+    // Save all updated players and delete the game — all in parallel
+    await Promise.all([
+      ...Object.keys(players).map(pid => kv.set(KEYS.PLAYER(pid), players[pid])),
+      kv.del(KEYS.GAME(lastGameId)),
+      kv.zrem(KEYS.GAMES_ALL, lastGameId),
+    ]);
 
     return res.status(200).json({
       message: 'Última partida eliminada',

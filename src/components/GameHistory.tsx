@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Game, Player } from '../types';
 import { useI18n, formatDate as formatDateI18n } from '../i18n';
 
@@ -10,6 +10,7 @@ interface GameHistoryProps {
 }
 
 const AVAILABLE_EXPANSIONS = ['Venus', 'Turmoil', 'CEOs', 'Velocity', 'Ares'];
+const PAGE_SIZE = 30;
 
 export default function GameHistory({ games, players, onDeleteGame, onUpdateGame }: GameHistoryProps) {
   const { t, language } = useI18n();
@@ -17,6 +18,11 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [editExpansions, setEditExpansions] = useState<string[]>([]);
   const [editGenerations, setEditGenerations] = useState<string>('');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [games.length]);
 
   const formatDate = (timestamp: number) => {
     return formatDateI18n(new Date(timestamp), language, {
@@ -116,7 +122,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
         </div>
       ) : (
         <div className="divide-y divide-tm-copper/20 dark:divide-white/10">
-          {games.map((game) => {
+          {games.slice(0, visibleCount).map((game) => {
             const isExpanded = selectedGame?.id === game.id;
             const winner = players[game.placements[0]];
 
@@ -385,6 +391,16 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
               </div>
             );
           })}
+          {visibleCount < games.length && (
+            <div className="px-6 py-5 text-center">
+              <button
+                onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                className="rounded-lg border border-tm-copper/40 bg-transparent px-6 py-2.5 text-sm font-semibold uppercase tracking-[0.2em] text-tm-oxide transition hover:bg-tm-copper/10 dark:border-white/20 dark:text-tm-sand dark:hover:bg-white/10"
+              >
+                {t.gameHistory.showMore} ({games.length - visibleCount})
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

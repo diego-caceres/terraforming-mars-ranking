@@ -116,6 +116,13 @@ export const en: Translations = {
     selectAtLeastTwoPlayers: 'Please select at least 2 players',
   },
 
+  gameResultModal: {
+    title: 'Game Result',
+    ratingChange: 'Change',
+    newRating: 'Final Rating',
+    twoPlayerNote: '2-player game — does not affect Elo ratings',
+  },
+
   playerStats: {
     // Loading/Error states
     loadingError: 'Error loading statistics',
@@ -303,6 +310,9 @@ export const en: Translations = {
     playersLabel: 'Players',
     generationsInfo: 'Generations',
     expansionsInfo: 'Expansions',
+
+    // Pagination
+    showMore: 'Show More',
   },
 
   exportImport: {

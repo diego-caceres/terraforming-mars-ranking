@@ -6,10 +6,15 @@ import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
 import { useI18n, getRelativeTimeString } from '../i18n';
 
+interface GameSummary {
+  game: Game;
+  players: Record<string, Player>;
+}
+
 interface AddGameProps {
   players: Record<string, Player>;
   games: Game[];
-  onSubmit: (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => void;
+  onSubmit: (placements: string[], gameDate: number, expansions: string[], generations: number | undefined) => Promise<GameSummary | null>;
   onUndo: () => void;
 }
 
@@ -19,12 +24,14 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   const { t, language } = useI18n();
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [placements, setPlacements] = useState<string[]>([]);
+  const [gameSummary, setGameSummary] = useState<GameSummary | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [gameDate, setGameDate] = useState<string>(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday.toISOString().split('T')[0];
   });
-  const [selectedExpansions, setSelectedExpansions] = useState<string[]>([]);
+  const [selectedExpansions, setSelectedExpansions] = useState<string[]>(() => games[0]?.expansions ?? []);
   const [generations, setGenerations] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
@@ -52,7 +59,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
     setPlacements(items);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (placements.length < 2) {
       alert(t.addGame.selectAtLeastTwoPlayers);
@@ -66,21 +73,28 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
 
     // Parse generations (optional)
     const generationsNum = generations ? parseInt(generations, 10) : undefined;
+    const usedExpansions = [...selectedExpansions];
 
-    onSubmit(placements, timestamp, selectedExpansions, generationsNum);
+    setIsSubmitting(true);
+    const result = await onSubmit(placements, timestamp, selectedExpansions, generationsNum);
+    setIsSubmitting(false);
     setSelectedPlayers([]);
     setPlacements([]);
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     setGameDate(yesterday.toISOString().split('T')[0]);
-    setSelectedExpansions([]);
+    setSelectedExpansions(usedExpansions);
     setGenerations('');
-    setShowSuccess(true);
-    setCanUndo(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-      setCanUndo(false);
-    }, 10000); // 10 seconds to undo
+    if (result) {
+      setGameSummary(result);
+    } else {
+      setShowSuccess(true);
+      setCanUndo(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setCanUndo(false);
+      }, 10000); // 10 seconds to undo
+    }
   };
 
   const toggleExpansion = (expansion: string) => {
@@ -113,8 +127,73 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
     return players[playerId]?.name || t.addGame.unknown;
   };
 
+  const isTwoPlayerGame = (gameSummary?.game.placements.length ?? 0) === 2;
+
   return (
     <div className="space-y-6">
+
+      {/* Game Result Modal */}
+      {gameSummary && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setGameSummary(null)}
+        >
+          <div
+            className="tm-card w-full max-w-sm mx-4 p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-heading uppercase tracking-[0.25em] text-tm-oxide dark:text-tm-glow text-center">
+              {t.gameResultModal.title}
+            </h2>
+
+            <div className="space-y-2">
+              {gameSummary.game.placements.map((playerId, index) => {
+                const player = gameSummary.players[playerId];
+                const change = gameSummary.game.ratingChanges[playerId] ?? 0;
+                const newRating = Math.round(player?.currentRating ?? 0);
+                const isPositive = change > 0;
+                return (
+                  <div
+                    key={playerId}
+                    className="flex items-center gap-3 rounded-lg bg-white/60 dark:bg-tm-haze/60 px-3 py-2.5"
+                  >
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${getPodiumClasses(index + 1)}`}>
+                      {index + 1}
+                    </div>
+                    {player?.color && (
+                      <div className={`w-3 h-3 shrink-0 rounded-full border-2 ${getColorClasses(player.color)}`} />
+                    )}
+                    <span className="flex-1 font-semibold text-sm text-tm-oxide dark:text-tm-sand truncate">
+                      {player?.name ?? t.addGame.unknown}
+                    </span>
+                    {!isTwoPlayerGame && (
+                      <span className={`text-sm font-bold tabular-nums ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : change < 0 ? 'text-red-500 dark:text-red-400' : 'text-tm-oxide/50 dark:text-tm-sand/50'}`}>
+                        {isPositive ? '+' : ''}{Math.round(change)}
+                      </span>
+                    )}
+                    <span className="text-xs text-tm-oxide/60 dark:text-tm-sand/60 tabular-nums min-w-[3rem] text-right">
+                      {newRating}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {isTwoPlayerGame && (
+              <p className="text-xs text-center text-tm-oxide/60 dark:text-tm-sand/60">
+                {t.gameResultModal.twoPlayerNote}
+              </p>
+            )}
+
+            <button
+              onClick={() => setGameSummary(null)}
+              className="tm-button-primary w-full justify-center"
+            >
+              {t.common.close}
+            </button>
+          </div>
+        </div>
+      )}
       {/* Recent Games Summary */}
       {recentGames.length > 0 && (
         <div className="tm-card p-4">
@@ -401,14 +480,22 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
         <div className="flex gap-3">
           <button
             type="submit"
-            disabled={placements.length < 2}
+            disabled={placements.length < 2 || isSubmitting}
             className={`flex-1 tm-button-primary justify-center disabled:pointer-events-none ${
-              placements.length < 2 ? 'cursor-not-allowed opacity-60' : ''
+              placements.length < 2 || isSubmitting ? 'cursor-not-allowed opacity-60' : ''
             }`}
           >
-            {t.addGame.addGameButton}
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                {language === 'es' ? 'Guardando...' : 'Saving...'}
+              </span>
+            ) : t.addGame.addGameButton}
           </button>
-          {placements.length > 0 && (
+          {placements.length > 0 && !isSubmitting && (
             <button
               type="button"
               onClick={handleReset}
