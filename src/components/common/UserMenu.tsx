@@ -10,6 +10,11 @@ const SPECIAL_NAMES: Record<string, string> = {
   gambo: 'Gambo el Don de los Gatos',
   bruno: 'Bruno, como skater un gran músico',
   dado: 'Dado el programador',
+  paula: 'Pau Rap La Rul',
+  leo: 'Leo el doc de nuestros corazones',
+  saant: 'Saant, diva de la noche y el día',
+  moui: 'Moui, el que ronca durante las partidas',
+  anto: 'Anto, siempre en una aventura distinta',
 };
 
 interface UserMenuProps {
