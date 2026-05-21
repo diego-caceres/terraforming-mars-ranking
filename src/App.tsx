@@ -274,7 +274,7 @@ function App() {
                 onToggleDarkMode={handleToggleDarkMode}
                 isAuthenticated={isAuthenticated}
                 onLogin={() => { setLoginNameOnly(false); setShowLoginModal(true); }}
-                onLogout={() => { clearSession(); setIsAuthenticated(false); }}
+                onLogout={() => { clearSession(); setIsAuthenticated(false); setUserName(''); }}
               />
             </div>
           </div>

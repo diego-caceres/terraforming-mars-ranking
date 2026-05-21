@@ -87,7 +87,7 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
   const chartData = stats.player.ratingHistory.map((entry, index) => ({
     game: index + 1,
     rating: entry.rating,
-    date: new Date(entry.date).toLocaleDateString(),
+    date: (() => { const d = new Date(entry.date); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })(),
   }));
 
   // Calculate Y-axis domain with padding for better zoom
@@ -222,6 +222,10 @@ export default function PlayerStats({ playerId, onClose }: PlayerStatsProps) {
                         border: 'none',
                         borderRadius: '0.375rem',
                         color: '#f5e0c3',
+                      }}
+                      labelFormatter={(label, payload) => {
+                        const date = payload?.[0]?.payload?.date;
+                        return date ? `#${label} · ${date}` : `#${label}`;
                       }}
                     />
                     <Line
