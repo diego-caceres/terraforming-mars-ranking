@@ -4,7 +4,14 @@ import type { DropResult } from '@hello-pangea/dnd';
 import type { Player, Game } from '../types';
 import { getColorClasses } from '../utils/colorUtils';
 import { getPodiumClasses } from '../utils/podiumUtils';
-import { useI18n, getRelativeTimeString } from '../i18n';
+import { useI18n, getRelativeTimeString, formatDate as formatLocalizedDate } from '../i18n';
+import {
+  getDefaultGameDate,
+  getMontevideoToday,
+  getMontevideoYesterday,
+  isLateNightInMontevideo,
+  dateInputToTimestamp,
+} from '../utils/gameDateUtils';
 
 interface GameSummary {
   game: Game;
@@ -26,11 +33,11 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   const [placements, setPlacements] = useState<string[]>([]);
   const [gameSummary, setGameSummary] = useState<GameSummary | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [gameDate, setGameDate] = useState<string>(() => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
-  });
+  const [gameDate, setGameDate] = useState<string>(() => getDefaultGameDate());
+  const [showDateOptions, setShowDateOptions] = useState(false);
+  // Una vez que el usuario abre las opciones de fecha, la elige él: no tiene
+  // sentido seguir explicándole la preselección de madrugada.
+  const [dateTouched, setDateTouched] = useState(false);
   const [selectedExpansions, setSelectedExpansions] = useState<string[]>(() => games[0]?.expansions ?? []);
   const [generations, setGenerations] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -68,8 +75,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
 
     // Convert date string to timestamp (avoiding timezone issues)
     // Parse the date as local time at noon to avoid timezone shifts
-    const [year, month, day] = gameDate.split('-').map(Number);
-    const timestamp = new Date(year, month - 1, day, 12, 0, 0).getTime();
+    const timestamp = dateInputToTimestamp(gameDate);
 
     // Parse generations (optional)
     const generationsNum = generations ? parseInt(generations, 10) : undefined;
@@ -80,9 +86,9 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
     setIsSubmitting(false);
     setSelectedPlayers([]);
     setPlacements([]);
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    setGameDate(yesterday.toISOString().split('T')[0]);
+    setGameDate(getDefaultGameDate());
+    setShowDateOptions(false);
+    setDateTouched(false);
     setSelectedExpansions(usedExpansions);
     setGenerations('');
     if (result) {
@@ -128,6 +134,20 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   };
 
   const isTwoPlayerGame = (gameSummary?.game.placements.length ?? 0) === 2;
+
+  // Fecha de la partida: se preselecciona según la hora en Montevideo
+  const todayStr = getMontevideoToday();
+  const yesterdayStr = getMontevideoYesterday();
+  const isLateNight = isLateNightInMontevideo();
+  const gameDateShortcut =
+    gameDate === todayStr ? t.addGame.gameDateToday
+    : gameDate === yesterdayStr ? t.addGame.gameDateYesterday
+    : null;
+  const gameDateFormatted = formatLocalizedDate(new Date(dateInputToTimestamp(gameDate)), language, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
 
   return (
     <div className="space-y-6">
@@ -275,51 +295,72 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
           <label className="block text-xs uppercase tracking-[0.3em] text-tm-oxide/70 dark:text-tm-sand/70 mb-2">
             {t.addGame.gameDateLabel}
           </label>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const yesterday = new Date();
-                  yesterday.setDate(yesterday.getDate() - 1);
-                  setGameDate(yesterday.toISOString().split('T')[0]);
-                }}
-                className={`rounded-md px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-all ${
-                  (() => {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const yesterdayStr = yesterday.toISOString().split('T')[0];
-                    return gameDate === yesterdayStr
-                      ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg border-2 border-tm-copper'
-                      : 'border-2 border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60';
-                  })()
-                }`}
-              >
-                {language === 'es' ? 'Ayer' : 'Yesterday'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setGameDate(new Date().toISOString().split('T')[0])}
-                className={`rounded-md px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-all ${
-                  gameDate === new Date().toISOString().split('T')[0]
-                    ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg border-2 border-tm-copper'
-                    : 'border-2 border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60'
-                }`}
-              >
-                {language === 'es' ? 'Hoy' : 'Today'}
-              </button>
-            </div>
-            <input
-              type="date"
-              value={gameDate}
-              onChange={(e) => setGameDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              className="flex-1 rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
-            />
+
+          {/* Fecha preseleccionada: se muestra como texto, con opción discreta de cambiarla */}
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-tm-oxide dark:text-tm-sand">
+            {gameDateShortcut && <span className="font-semibold">{gameDateShortcut}</span>}
+            <span className={gameDateShortcut ? 'text-tm-oxide/60 dark:text-tm-sand/60' : 'font-semibold'}>
+              {gameDateFormatted}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowDateOptions(prev => !prev);
+                setDateTouched(true);
+              }}
+              aria-expanded={showDateOptions}
+              className="text-xs uppercase tracking-wide text-tm-copper-dark underline decoration-dotted underline-offset-4 hover:text-tm-copper dark:text-tm-glow/80 dark:hover:text-tm-glow"
+            >
+              {t.addGame.gameDateChange}
+            </button>
           </div>
-          <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
-            {t.addGame.gameDateHelper}
-          </p>
+
+          {isLateNight && !dateTouched && (
+            <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+              {t.addGame.gameDateLateNightNote}
+            </p>
+          )}
+
+          {showDateOptions && (
+            <div className="mt-3">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setGameDate(yesterdayStr)}
+                    className={`rounded-md px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-all ${
+                      gameDate === yesterdayStr
+                        ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg border-2 border-tm-copper'
+                        : 'border-2 border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60'
+                    }`}
+                  >
+                    {t.addGame.gameDateYesterday}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGameDate(todayStr)}
+                    className={`rounded-md px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-all ${
+                      gameDate === todayStr
+                        ? 'bg-gradient-to-r from-tm-copper to-tm-copper-dark text-white shadow-lg border-2 border-tm-copper'
+                        : 'border-2 border-tm-copper/40 bg-white/75 text-tm-oxide hover:bg-white dark:bg-tm-haze/70 dark:text-tm-sand dark:hover:bg-tm-haze/60'
+                    }`}
+                  >
+                    {t.addGame.gameDateToday}
+                  </button>
+                </div>
+                <input
+                  type="date"
+                  value={gameDate}
+                  onChange={(e) => setGameDate(e.target.value)}
+                  max={todayStr}
+                  className="flex-1 rounded-md border border-tm-copper/40 bg-white/85 px-4 py-2 text-tm-oxide shadow-inner focus:border-tm-copper focus:ring-2 focus:ring-tm-glow/60 dark:bg-tm-haze/80 dark:text-tm-sand"
+                />
+              </div>
+              <p className="mt-1 text-xs text-tm-oxide/60 dark:text-tm-sand/60">
+                {t.addGame.gameDateHelper}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Generations */}

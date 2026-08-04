@@ -89,6 +89,10 @@ export const es: Translations = {
     // Form labels
     gameDateLabel: 'Fecha de la Partida',
     gameDateHelper: 'Seleccioná la fecha en que se jugó esta partida',
+    gameDateToday: 'Hoy',
+    gameDateYesterday: 'Ayer',
+    gameDateChange: 'Cambiar',
+    gameDateLateNightNote: 'Todavía no son las 2 AM, asi que asumamos que la partida es de ayer.',
     generationsLabel: 'Número de Generaciones (Opcional)',
     generationsPlaceholder: 'Ingresá un número (1-16)',
     generationsHelper: '¿Cuántas generaciones se jugaron en esta partida?',

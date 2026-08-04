@@ -92,6 +92,10 @@ export interface Translations {
     // Form labels
     gameDateLabel: string;
     gameDateHelper: string;
+    gameDateToday: string;
+    gameDateYesterday: string;
+    gameDateChange: string;
+    gameDateLateNightNote: string;
     generationsLabel: string;
     generationsPlaceholder: string;
     generationsHelper: string;
