@@ -125,6 +125,20 @@ export const en: Translations = {
     ratingChange: 'Change',
     newRating: 'Final Rating',
     twoPlayerNote: '2-player game — does not affect Elo ratings',
+
+    // Table movement
+    passed: 'Passed {names}',
+    newPeak: 'New personal best!',
+
+    // Player record
+    record: '{wins} wins in {games} games',
+    winStreak: '{count} in a row',
+    milestone: '{games} games!',
+
+    // Game recap
+    gameNumber: 'Game #{number}',
+    generationsCount: '{count} generations',
+    upset: 'Upset!',
   },
 
   playerStats: {

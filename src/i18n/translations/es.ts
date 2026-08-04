@@ -125,6 +125,20 @@ export const es: Translations = {
     ratingChange: 'Cambio',
     newRating: 'Rating Final',
     twoPlayerNote: 'Partida de 2 jugadores — no afecta el rating ELO',
+
+    // Movimiento en la tabla
+    passed: 'Pasó a {names}',
+    newPeak: '¡Récord personal!',
+
+    // Récord del jugador
+    record: '{wins} victorias en {games} partidas',
+    winStreak: '{count} seguidas',
+    milestone: '¡{games} partidas!',
+
+    // Resumen de la partida
+    gameNumber: 'Partida #{number}',
+    generationsCount: '{count} generaciones',
+    upset: '¡Batacazo!',
   },
 
   playerStats: {

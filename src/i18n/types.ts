@@ -128,6 +128,20 @@ export interface Translations {
     ratingChange: string;
     newRating: string;
     twoPlayerNote: string;
+
+    // Movimiento en la tabla
+    passed: string; // "Pasó a {names}"
+    newPeak: string;
+
+    // Récord del jugador
+    record: string; // "{wins} victorias en {games} partidas"
+    winStreak: string; // "{count} seguidas"
+    milestone: string; // "¡{games} partidas!"
+
+    // Resumen de la partida
+    gameNumber: string; // "Partida #{number}"
+    generationsCount: string; // "{count} generaciones"
+    upset: string;
   };
 
   playerStats: {
