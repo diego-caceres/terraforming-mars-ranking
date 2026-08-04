@@ -309,6 +309,7 @@ export const es: Translations = {
     unknown: 'Desconocido',
 
     // Button tooltips
+    viewSummary: 'Ver resumen',
     editGame: 'Editar partida',
     deleteGame: 'Eliminar partida',
 

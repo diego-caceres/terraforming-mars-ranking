@@ -1,13 +1,21 @@
 import type { Game, Player } from '../types';
 
 /**
- * Estadísticas derivadas de una partida recién registrada, para mostrar en el
- * modal de resultado. Todo se calcula en el cliente a partir de datos que ya
- * tenemos: no hace falta tocar la API.
+ * Estadísticas derivadas de una partida (recién jugada o histórica) para el
+ * modal de resultado. Todo se calcula en el cliente reproduciendo el
+ * historial completo de partidas en orden cronológico — el mismo criterio
+ * que usa el servidor al recalcular ratings tras un borrado (ver
+ * api/games/[id].ts) — así que el resumen es correcto sin importar si la
+ * partida se acaba de registrar o es de hace meses, y sin depender del
+ * orden de `ratingHistory` (que puede no ser cronológico si se cargó una
+ * partida con fecha retroactiva).
  */
 
 /** Misma ventana de actividad que usa /api/rankings para el filtro de activos. */
 const ACTIVE_WINDOW_MS = 45 * 24 * 60 * 60 * 1000;
+
+/** Debe coincidir con STARTING_RATING de api/_lib/eloCalculator.ts. */
+const STARTING_RATING = 1500;
 
 const GAME_MILESTONES = [10, 25, 50, 100, 150, 200, 250, 300, 400, 500];
 
@@ -25,15 +33,15 @@ export interface PlayerGameSummary {
   isNewPeak: boolean;
   wins: number;
   gamesPlayed: number;
-  /** Victorias consecutivas actuales (ignora partidas que no jugó). */
+  /** Victorias consecutivas hasta esta partida inclusive. */
   winStreak: number;
-  /** Hito de partidas jugadas alcanzado justo ahora, si aplica. */
+  /** Hito de partidas jugadas alcanzado justo en esta partida, si aplica. */
   milestone: number | null;
 }
 
 export interface GameSummaryStats {
   rows: PlayerGameSummary[];
-  /** Cantidad total de partidas de la liga, contando esta. */
+  /** Posición cronológica de esta partida en la historia de la liga. */
   gameNumber: number;
   /** El ganador era el peor rankeado de la mesa antes de jugar. */
   isUpset: boolean;
@@ -41,125 +49,143 @@ export interface GameSummaryStats {
 
 interface BuildArgs {
   game: Game;
-  /** Jugadores de la partida, ya actualizados (respuesta de la API). */
-  summaryPlayers: Record<string, Player>;
-  /** Todos los jugadores de la liga. */
-  allPlayers: Record<string, Player>;
-  /** Historial de partidas (puede o no incluir todavía la nueva). */
+  /** Todos los jugadores de la liga (sólo se usa para nombre/color). */
+  players: Record<string, Player>;
+  /** Historial completo de partidas, en cualquier orden. */
   games: Game[];
 }
 
-/** Victorias consecutivas más recientes, salteando partidas que no jugó. */
-function currentWinStreak(playerId: string, newestFirst: Game[]): number {
-  let streak = 0;
-  for (const game of newestFirst) {
-    if (!game.placements.includes(playerId)) continue;
-    if (game.placements[0] !== playerId) break;
-    streak++;
-  }
-  return streak;
+interface ReplayState {
+  rating: number;
+  peak: number;
+  gamesPlayed: number;
+  wins: number;
+  lastPlayed: number;
 }
 
-/** Mapa playerId → posición (1-based) ordenando por rating descendente. */
-function rankByRating(players: Player[], getRating: (player: Player) => number): Map<string, number> {
-  const sorted = [...players].sort(
-    (a, b) => getRating(b) - getRating(a) || a.name.localeCompare(b.name)
+function createReplayState(): ReplayState {
+  return { rating: STARTING_RATING, peak: STARTING_RATING, gamesPlayed: 0, wins: 0, lastPlayed: -Infinity };
+}
+
+/** Mapa playerId → posición (1-based), sólo entre jugadores activos a esa fecha. */
+function rankSnapshot(
+  snapshot: Map<string, ReplayState>,
+  asOfDate: number,
+  players: Record<string, Player>
+): Map<string, number> {
+  const active = [...snapshot.entries()].filter(
+    ([, s]) => s.gamesPlayed > 0 && asOfDate - s.lastPlayed <= ACTIVE_WINDOW_MS
   );
-  return new Map(sorted.map((player, index) => [player.id, index + 1]));
+  active.sort(([idA, a], [idB, b]) => {
+    if (b.rating !== a.rating) return b.rating - a.rating;
+    return (players[idA]?.name ?? '').localeCompare(players[idB]?.name ?? '');
+  });
+  return new Map(active.map(([id], index) => [id, index + 1]));
 }
 
-export function buildGameSummaryStats({
-  game,
-  summaryPlayers,
-  allPlayers,
-  games,
-}: BuildArgs): GameSummaryStats {
-  // Los jugadores de la partida vienen de la API y son la fuente autoritativa
-  // del estado post-partida; el resto de la liga sale del estado de la app.
-  const after: Record<string, Player> = { ...allPlayers, ...summaryPlayers };
+export function buildGameSummaryStats({ game, players, games }: BuildArgs): GameSummaryStats {
+  const isTwoPlayerGame = game.twoPlayerGame ?? game.placements.length === 2;
 
-  const isTwoPlayerGame = game.placements.length === 2;
+  // Puede que la partida recién registrada todavía no esté en `games`
+  // (el estado del padre puede tardar un tick en propagarse).
+  const allGames = games.some(g => g.id === game.id) ? games : [...games, game];
+  const chronological = [...allGames].sort((a, b) => a.date - b.date || a.id.localeCompare(b.id));
 
-  const history = games.some(g => g.id === game.id) ? games : [game, ...games];
-  const newestFirst = [...history].sort((a, b) => b.date - a.date);
+  const state = new Map<string, ReplayState>();
+  let before = new Map<string, ReplayState>();
+  let after = new Map<string, ReplayState>();
+  let streakAtTarget = new Map<string, number>();
+  const streaks = new Map<string, number>();
+  let gameNumber = 0;
 
-  // Rating previo: sólo cambió el de quienes jugaron esta partida.
-  const ratingBefore = (player: Player) =>
-    player.currentRating - (game.ratingChanges[player.id] ?? 0);
+  chronological.forEach((g, index) => {
+    if (g.id === game.id) {
+      before = new Map([...state.entries()].map(([id, s]) => [id, { ...s }]));
+    }
 
-  // Misma cohorte en ambas fotos (activos con partidas jugadas), así el delta
-  // refleja movimiento real de rating y no cambios en quién entra a la tabla.
-  const now = Date.now();
-  const cohort = Object.values(after).filter(player => {
-    if (player.gamesPlayed <= 0) return false;
-    const lastGame = player.ratingHistory[player.ratingHistory.length - 1]?.date ?? 0;
-    return now - lastGame <= ACTIVE_WINDOW_MS;
+    g.placements.forEach((playerId, placementIndex) => {
+      let s = state.get(playerId);
+      if (!s) {
+        s = createReplayState();
+        state.set(playerId, s);
+      }
+      const change = g.ratingChanges[playerId] ?? 0;
+      s.rating += change;
+      s.peak = Math.max(s.peak, s.rating);
+      s.gamesPlayed += 1;
+      s.lastPlayed = g.date;
+
+      const isWin = placementIndex === 0;
+      if (isWin) s.wins += 1;
+      streaks.set(playerId, isWin ? (streaks.get(playerId) ?? 0) + 1 : 0);
+    });
+
+    if (g.id === game.id) {
+      after = new Map([...state.entries()].map(([id, s]) => [id, { ...s }]));
+      streakAtTarget = new Map(streaks);
+      gameNumber = index + 1;
+    }
   });
 
-  const ranksBefore = rankByRating(cohort, ratingBefore);
-  const ranksAfter = rankByRating(cohort, player => player.currentRating);
-  const byId = new Map(cohort.map(player => [player.id, player]));
+  const beforeRanks = rankSnapshot(before, game.date, players);
+  const afterRanks = rankSnapshot(after, game.date, players);
 
   const rows: PlayerGameSummary[] = game.placements.map((playerId, index) => {
-    const player = after[playerId];
     const ratingChange = game.ratingChanges[playerId] ?? 0;
-    const rankBefore = ranksBefore.get(playerId) ?? null;
-    const rankAfter = ranksAfter.get(playerId) ?? null;
+    const afterState = after.get(playerId);
+    const rankBefore = beforeRanks.get(playerId) ?? null;
+    const rankAfter = afterRanks.get(playerId) ?? null;
     const rankDelta = rankBefore !== null && rankAfter !== null ? rankBefore - rankAfter : 0;
 
     // A quiénes pasó: estaban arriba antes y quedaron abajo después.
     const passed =
       rankDelta > 0 && rankBefore !== null && rankAfter !== null
-        ? cohort
-            .filter(other => {
-              if (other.id === playerId) return false;
-              const otherBefore = ranksBefore.get(other.id);
-              const otherAfter = ranksAfter.get(other.id);
+        ? [...beforeRanks.keys()]
+            .filter(otherId => {
+              if (otherId === playerId) return false;
+              const otherBefore = beforeRanks.get(otherId);
+              const otherAfter = afterRanks.get(otherId);
               if (otherBefore === undefined || otherAfter === undefined) return false;
               return otherBefore < rankBefore && otherAfter > rankAfter;
             })
-            .map(other => other.name)
+            .map(otherId => players[otherId]?.name ?? '')
+            .filter(Boolean)
         : [];
 
-    // applyRatingChanges deja peakRating = max(peak, nuevoRating), así que un
-    // récord nuevo implica que el rating actual quedó igual al pico.
     const isNewPeak =
       !isTwoPlayerGame &&
       ratingChange > 0 &&
-      player !== undefined &&
-      Math.round(player.currentRating) >= Math.round(player.peakRating);
+      afterState !== undefined &&
+      Math.round(afterState.rating) >= Math.round(afterState.peak);
+
+    const gamesPlayed = afterState?.gamesPlayed ?? 0;
 
     return {
       playerId,
       placement: index + 1,
       ratingChange,
-      newRating: Math.round(player?.currentRating ?? 0),
+      newRating: Math.round(afterState?.rating ?? STARTING_RATING),
       rankBefore,
       rankAfter,
       rankDelta,
       passed,
       isNewPeak,
-      wins: player?.wins ?? 0,
-      gamesPlayed: player?.gamesPlayed ?? 0,
-      winStreak: currentWinStreak(playerId, newestFirst),
-      milestone: player && GAME_MILESTONES.includes(player.gamesPlayed) ? player.gamesPlayed : null,
+      wins: afterState?.wins ?? 0,
+      gamesPlayed,
+      winStreak: streakAtTarget.get(playerId) ?? 0,
+      milestone: GAME_MILESTONES.includes(gamesPlayed) ? gamesPlayed : null,
     };
   });
 
   // Batacazo: el ganador era el de menor rating de la mesa antes de jugar.
-  const participants = game.placements
-    .map(id => byId.get(id) ?? after[id])
-    .filter((player): player is Player => Boolean(player));
   const winnerId = game.placements[0];
-  const winner = after[winnerId];
+  const winnerBefore = before.get(winnerId)?.rating ?? STARTING_RATING;
   const isUpset =
     !isTwoPlayerGame &&
     game.placements.length >= 3 &&
-    participants.length === game.placements.length &&
-    winner !== undefined &&
-    participants.every(
-      player => player.id === winnerId || ratingBefore(player) > ratingBefore(winner)
-    );
+    game.placements
+      .filter(id => id !== winnerId)
+      .every(id => (before.get(id)?.rating ?? STARTING_RATING) > winnerBefore);
 
-  return { rows, gameNumber: history.length, isUpset };
+  return { rows, gameNumber, isUpset };
 }

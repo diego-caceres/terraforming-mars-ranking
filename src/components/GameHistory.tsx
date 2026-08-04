@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Game, Player } from '../types';
 import { useI18n, formatDate as formatDateI18n } from '../i18n';
+import GameResultModal from './common/GameResultModal';
 
 interface GameHistoryProps {
   games: Game[];
@@ -15,6 +16,7 @@ const PAGE_SIZE = 30;
 export default function GameHistory({ games, players, onDeleteGame, onUpdateGame }: GameHistoryProps) {
   const { t, language } = useI18n();
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [viewingGame, setViewingGame] = useState<Game | null>(null);
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [editExpansions, setEditExpansions] = useState<string[]>([]);
   const [editGenerations, setEditGenerations] = useState<string>('');
@@ -106,7 +108,16 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
   };
 
   return (
-    <div className="tm-card overflow-hidden">
+    <>
+      {viewingGame && (
+        <GameResultModal
+          game={viewingGame}
+          players={players}
+          games={games}
+          onClose={() => setViewingGame(null)}
+        />
+      )}
+      <div className="tm-card overflow-hidden">
       <div className="tm-card-header px-6 py-5">
         <h2 className="text-2xl font-heading uppercase tracking-[0.3em] text-tm-oxide dark:text-tm-glow">
           {t.gameHistory.title}
@@ -172,6 +183,25 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setViewingGame(game); }}
+                        className="rounded-full border border-transparent p-2 text-tm-oxide hover:border-tm-oxide/40 hover:bg-tm-oxide/10 dark:text-tm-sand dark:hover:bg-white/10"
+                        title={t.gameHistory.viewSummary}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                          />
+                        </svg>
+                      </button>
                       <button
                         onClick={(e) => handleStartEdit(game, e)}
                         className="rounded-full border border-transparent p-2 text-tm-oxide hover:border-tm-oxide/40 hover:bg-tm-oxide/10 dark:text-tm-sand dark:hover:bg-white/10"
@@ -403,6 +433,7 @@ export default function GameHistory({ games, players, onDeleteGame, onUpdateGame
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

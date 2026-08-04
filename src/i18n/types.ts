@@ -312,6 +312,7 @@ export interface Translations {
     unknown: string; // Unknown player name
 
     // Button tooltips
+    viewSummary: string;
     editGame: string;
     deleteGame: string;
 
