@@ -28,6 +28,11 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [placements, setPlacements] = useState<string[]>([]);
   const [viewingGame, setViewingGame] = useState<Game | null>(null);
+  // Snapshot de jugadores devuelto junto con la partida recién registrada.
+  // Se usa (mezclado sobre `players`) sólo para esa partida puntual, así el
+  // modal muestra el rating correcto al instante, sin depender de que el
+  // prop `players` del padre ya se haya refrescado.
+  const [viewingGamePlayers, setViewingGamePlayers] = useState<Record<string, Player> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gameDate, setGameDate] = useState<string>(() => getDefaultGameDate());
   const [showDateOptions, setShowDateOptions] = useState(false);
@@ -89,6 +94,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
     setGenerations('');
     if (result) {
       setViewingGame(result.game);
+      setViewingGamePlayers(result.players);
     } else {
       setShowSuccess(true);
       setCanUndo(true);
@@ -150,9 +156,12 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
       {viewingGame && (
         <GameResultModal
           game={viewingGame}
-          players={players}
+          players={viewingGamePlayers ? { ...players, ...viewingGamePlayers } : players}
           games={games}
-          onClose={() => setViewingGame(null)}
+          onClose={() => {
+            setViewingGame(null);
+            setViewingGamePlayers(null);
+          }}
         />
       )}
       {/* Recent Games Summary */}
@@ -165,7 +174,7 @@ export default function AddGame({ players, games, onSubmit, onUndo }: AddGamePro
             {recentGames.map((game) => (
               <div
                 key={game.id}
-                onClick={() => setViewingGame(game)}
+                onClick={() => { setViewingGame(game); setViewingGamePlayers(null); }}
                 className="flex items-center justify-between text-xs border-l-2 border-tm-copper/40 pl-3 py-1.5 cursor-pointer rounded-r-md transition-colors hover:bg-tm-copper/10 dark:hover:bg-white/5"
               >
                 <div className="flex items-center gap-3">

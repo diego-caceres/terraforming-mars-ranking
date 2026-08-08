@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv, KEYS } from '../_lib/kv';
-import { calculateEloChanges, applyRatingChanges, getStartingRating } from '../_lib/eloCalculator';
+import { calculateGameRatingChanges, applyRatingChanges, getStartingRating } from '../_lib/eloCalculator';
 import type { Player, Game } from '../_lib/types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -89,19 +89,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      // Replay all remaining games
+      // Replay all remaining games, persisting each one's recalculated
+      // ratingChanges so it never goes stale relative to the players'
+      // ratingHistory (which this same loop also rebuilds from scratch).
+      const updatedGames: Game[] = [];
       for (const g of remainingGames) {
-        const ratingChanges = calculateEloChanges(g.placements, players);
-        const gameWithChanges = { ...g, ratingChanges };
+        const isTwoPlayerGame = g.twoPlayerGame ?? g.placements.length === 2;
+        const ratingChanges = calculateGameRatingChanges(g.placements, players, isTwoPlayerGame);
+        const gameWithChanges: Game = { ...g, ratingChanges };
         const updatedPlayers = applyRatingChanges(players, gameWithChanges);
 
         // Update local copy
         Object.assign(players, updatedPlayers);
+        updatedGames.push(gameWithChanges);
       }
 
-      // Save all updated players, delete the game — all in parallel
+      // Save all updated players, updated games, delete the game — all in parallel
       await Promise.all([
         ...Object.keys(players).map(pid => kv.set(KEYS.PLAYER(pid), players[pid])),
+        ...updatedGames.map(g => kv.set(KEYS.GAME(g.id), g)),
         kv.del(KEYS.GAME(id)),
         kv.zrem(KEYS.GAMES_ALL, id),
       ]);

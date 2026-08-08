@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv, KEYS } from './_lib/kv';
-import { calculateEloChanges, applyRatingChanges } from './_lib/eloCalculator';
+import { calculateGameRatingChanges, applyRatingChanges } from './_lib/eloCalculator';
 import type { Player, Game, GameResult } from './_lib/types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -36,9 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const isTwoPlayerGame = placements.length === 2;
 
       // Calculate Elo changes (will be zero for 2-player games)
-      const ratingChanges = isTwoPlayerGame
-        ? Object.fromEntries(placements.map(id => [id, 0]))
-        : calculateEloChanges(placements, players);
+      const ratingChanges = calculateGameRatingChanges(placements, players, isTwoPlayerGame);
 
       // Create game object
       const newGame: Game = {

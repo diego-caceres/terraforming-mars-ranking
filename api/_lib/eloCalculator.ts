@@ -72,6 +72,25 @@ export function calculateEloChanges(
 }
 
 /**
+ * Calculate rating changes for a game, respecting the rule that 2-player
+ * games never affect Elo (only activity/wins are tracked). Centralized here
+ * so every caller that recomputes ratingChanges — recording a new game,
+ * recalculating after a deletion — applies the same rule and can't drift
+ * out of sync with each other.
+ */
+export function calculateGameRatingChanges(
+  placements: string[],
+  players: Record<string, Player>,
+  isTwoPlayerGame: boolean,
+  kFactor: number = K_FACTOR
+): Record<string, number> {
+  if (isTwoPlayerGame) {
+    return Object.fromEntries(placements.map(id => [id, 0]));
+  }
+  return calculateEloChanges(placements, players, kFactor);
+}
+
+/**
  * Apply rating changes to players and update their stats
  * For 2-player games, only track activity (games played, wins) but don't change rating
  */
