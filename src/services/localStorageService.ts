@@ -1,5 +1,5 @@
 import type { Player, Game, GameResult, PlayerColor } from '../types';
-import { calculateEloChanges } from './eloCalculator';
+import { calculateGameRatingChanges } from './eloCalculator';
 
 const STORAGE_KEYS = {
   PLAYERS: 'tm_rankings_players',
@@ -128,8 +128,9 @@ export function recordGame(
   const playersData = localStorage.getItem(STORAGE_KEYS.PLAYERS);
   const playersMap: Record<string, Player> = playersData ? JSON.parse(playersData) : {};
 
-  // Calculate Elo changes
-  const ratingChanges = calculateEloChanges(gameResult.placements, playersMap);
+  // Calculate Elo changes (zero for 2-player games — they only count as activity)
+  const isTwoPlayerGame = gameResult.placements.length === 2;
+  const ratingChanges = calculateGameRatingChanges(gameResult.placements, playersMap, isTwoPlayerGame);
 
   // Create game object
   const game: Game = {
@@ -139,6 +140,7 @@ export function recordGame(
     ratingChanges,
     expansions: gameResult.expansions,
     generations: gameResult.generations,
+    twoPlayerGame: isTwoPlayerGame,
   };
 
   // Update players
@@ -256,7 +258,8 @@ function recalculateAllRatings(): Record<string, Player> {
 
   // Replay all games
   sortedGames.forEach((game) => {
-    const ratingChanges = calculateEloChanges(game.placements, playersMap);
+    const isTwoPlayerGame = game.twoPlayerGame ?? game.placements.length === 2;
+    const ratingChanges = calculateGameRatingChanges(game.placements, playersMap, isTwoPlayerGame);
 
     game.placements.forEach((playerId, index) => {
       const player = playersMap[playerId];

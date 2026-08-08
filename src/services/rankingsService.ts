@@ -1,6 +1,6 @@
 import type { Player, Game } from '../types';
 import {
-  calculateEloChanges,
+  calculateGameRatingChanges,
   applyRatingChanges,
   getStartingRating,
   getMonthlyKFactor,
@@ -59,8 +59,9 @@ export function calculateMonthlyIndependentRankings(
 
   // Calculate ELO for the month using monthly K-factor
   for (const game of sortedGames) {
-    // Always recalculate with monthly K-factor
-    const ratingChanges = calculateEloChanges(game.placements, players, monthlyKFactor);
+    // Always recalculate with monthly K-factor (2-player games stay Elo-neutral)
+    const isTwoPlayerGame = game.twoPlayerGame ?? game.placements.length === 2;
+    const ratingChanges = calculateGameRatingChanges(game.placements, players, isTwoPlayerGame, monthlyKFactor);
     const gameWithChanges = { ...game, ratingChanges };
     const updatedPlayers = applyRatingChanges(players, gameWithChanges);
     Object.assign(players, updatedPlayers);
@@ -116,8 +117,8 @@ export function calculateMonthlyAccumulatedRankings(
   allPlayers.forEach(playerData => {
     if (playerIdsSet.has(playerData.id)) {
       const sortedHistory = [...playerData.ratingHistory].sort((a, b) => a.date - b.date);
-      let lastBeforeMonth = sortedHistory.find(entry => entry.date < monthStart);
-      let firstInMonth = sortedHistory.find(
+      const lastBeforeMonth = sortedHistory.find(entry => entry.date < monthStart);
+      const firstInMonth = sortedHistory.find(
         entry => entry.date >= monthStart && entry.date < monthEnd
       );
 
@@ -140,10 +141,11 @@ export function calculateMonthlyAccumulatedRankings(
 
   // Recalculate ELO for the month
   for (const game of sortedGames) {
+    const isTwoPlayerGame = game.twoPlayerGame ?? game.placements.length === 2;
     const ratingChanges =
       game.ratingChanges && Object.keys(game.ratingChanges).length > 0
         ? game.ratingChanges
-        : calculateEloChanges(game.placements, players);
+        : calculateGameRatingChanges(game.placements, players, isTwoPlayerGame);
     const gameWithChanges = { ...game, ratingChanges };
     const updatedPlayers = applyRatingChanges(players, gameWithChanges);
     Object.assign(players, updatedPlayers);

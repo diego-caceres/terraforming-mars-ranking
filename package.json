@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "migrate:peak-ratings": "tsx --env-file=.env scripts/migrate-peak-ratings.ts",
     "migrate:fix-rating-changes": "tsx --env-file=.env scripts/fix-stale-rating-changes.ts"
   },
@@ -35,6 +37,7 @@
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vitest": "^4.1.10"
   }
 }
