@@ -16,7 +16,7 @@
  *      game record AND the participants' currentRating.
  *
  * Both are now fixed in api/games.ts and api/games/[id].ts (see
- * calculateGameRatingChanges in shared/eloCalculator.ts). This script
+ * calculateGameRatingChanges in api/_lib/eloCalculator.ts). This script
  * heals the damage already sitting in the database: it fully replays the
  * league's entire game history from scratch, in date order, with the
  * corrected logic, and persists the recomputed players and games.
@@ -37,11 +37,11 @@
 
 import { Redis } from '@upstash/redis';
 
-// Reimplemented inline rather than imported from shared/eloCalculator —
+// Reimplemented inline rather than imported from api/_lib/eloCalculator —
 // same approach as scripts/migrate-peak-ratings.ts — to avoid tsx/Node's
 // relative cross-directory TS resolution quirks in this project. Keep this
 // in sync with calculateGameRatingChanges/applyRatingChanges/
-// getStartingRating in shared/eloCalculator.ts if that file ever changes.
+// getStartingRating in api/_lib/eloCalculator.ts if that file ever changes.
 
 const K_FACTOR = 40;
 const STARTING_RATING = 1500;
